@@ -1,1 +1,5 @@
-CD .
+ant -p
+
+ant compile 
+
+ant run
