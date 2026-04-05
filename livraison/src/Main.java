@@ -12,7 +12,7 @@ import java.awt.geom.Rectangle2D;
 public class Main {
     public static void main(String[] args) {
         
-        Player player1 = new Player("Krim");
+        Player player1 = new Player("Krim  ja ");
         Player player2 = new Player("Taiwen");
         GameModel game = new GameModel();
         Rectangle rect1 = new Rectangle(10, 10, 100, 100, Color.RED);
