@@ -1,5 +1,7 @@
 import javax.swing.*;
+
 import mvc.model.game.Player;
+import mvc.commands.*;
 import mvc.model.shapes.Rectangle;
 import mvc.model.shapes.Circle;
 import mvc.model.game.GameModel;
@@ -12,7 +14,7 @@ import java.awt.geom.Rectangle2D;
 public class Main {
     public static void main(String[] args) {
         
-        Player player1 = new Player("Krim  ja ");
+        Player player1 = new Player("Krim  jag ");
         Player player2 = new Player("Taiwen");
         GameModel game = new GameModel();
         Rectangle rect1 = new Rectangle(10, 10, 100, 100, Color.RED);
