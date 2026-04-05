@@ -24,14 +24,20 @@ public class GameModel extends Observable {
         currentLevel = 0;
         totalScore = 0;
     }
-    
+
     public void generateRedShapes(int count, int panelWidth, int panelHeight) {
-        redShapes = generationStrategy.generateShapes(count, panelWidth, panelHeight);
         state = GameState.RED_VISIBLE;
+  
+        List<GameShape> newRedShapes = generationStrategy.generateShapes(count, panelWidth, panelHeight);
+        
+        for (GameShape shape : newRedShapes) {
+            redShapes.add(shape);
+        }
+
+        nextLevel();
         setChanged();
         notifyObservers();
     }
-    
     public boolean canPlaceBlueShape(GameShape shape) {
         for (GameShape red : redShapes) {
             if (shape.intersects(red)) {
@@ -45,7 +51,6 @@ public class GameModel extends Observable {
         }
         return true;
     }
-    
     public void addBlueShape(GameShape shape) {
         if (blueShapes.size() < 4 && canPlaceBlueShape(shape)) {
             blueShapes.add(shape);
@@ -60,7 +65,6 @@ public class GameModel extends Observable {
             notifyObservers();
         }
     }
-    
     public int calculateScore() {
         double totalArea = 0;
         for (GameShape shape : blueShapes) {
@@ -68,19 +72,16 @@ public class GameModel extends Observable {
         }
         return (int)totalArea;
     }
-    
+
     public void removeBlueShape(GameShape shape) {
         blueShapes.remove(shape);
         setChanged();
         notifyObservers();
     }
-    
-    public void nextLevel(int panelWidth, int panelHeight) {
-        blueShapes.clear();
-        currentLevel++;
-        generateRedShapes(4, panelWidth, panelHeight);
-    }
 
+    public void nextLevel() {
+        currentLevel++;
+    }
 
     public List<GameShape> getRedShapes() { return redShapes; }
     public List<GameShape> getBlueShapes() { return blueShapes; }
