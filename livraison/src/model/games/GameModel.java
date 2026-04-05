@@ -72,26 +72,35 @@ public class GameModel extends Observable {
         }
         return (int)totalArea;
     }
-
     public void removeBlueShape(GameShape shape) {
         blueShapes.remove(shape);
         setChanged();
         notifyObservers();
     }
-
     public void nextLevel() {
         currentLevel++;
     }
-
+    
+    public int getLevel(){ return currentLevel;}
+    public long getRedVisibleTime(){ return redShapesVisibleUntil;}
     public List<GameShape> getRedShapes() { return redShapes; }
     public List<GameShape> getBlueShapes() { return blueShapes; }
     public void setGenerationStrategy(ShapeGenerationStrategy strategy) { 
         this.generationStrategy = strategy; 
     }
-
     public GameState getState() { return state; }
     public int getTotalScore() { return totalScore; }
     public boolean areRedShapesVisible() {
         return true;
+    }
+    public void getStatistics () {
+        System.out.printf("========== GAME STATISTICS  %s ==========%n", currentLevel);
+        System.out.println("Total Score: " + totalScore);
+        System.out.println("Game State: " + state);
+        System.out.println("Red Shapes Visible: " + areRedShapesVisible());
+        System.out.println("Red Visible Time: " + redShapesVisibleUntil);
+        System.out.println("Reds: " + getRedShapes().size());
+        System.out.println("Blues: " + getBlueShapes().size());
+        System.out.println();
     }
 }
