@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.geom.*;
 
 public class Circle implements GameShape {
+    
     private double x, y, radius;
     private Color color;
     
@@ -16,7 +17,6 @@ public class Circle implements GameShape {
     
     @Override
     public boolean intersects(GameShape other) {
-
         return false;
     }
     
@@ -37,11 +37,15 @@ public class Circle implements GameShape {
     public boolean contains(Point2D p) {
         return p.distance(x, y) <= radius;
     }
-    
-  
+
+    @Override
+    public double getX() { return x; }
+
+    @Override
+    public double getY() { return y; }
     
     @Override
-    public void translate(double dx, double dy) {
+    public void move(double dx, double dy) {
         x += dx;
         y += dy;
     }

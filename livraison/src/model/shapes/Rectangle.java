@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 public class Rectangle implements GameShape {
+
     private double x, y, width, height;
     private Color color;
     
@@ -15,6 +16,12 @@ public class Rectangle implements GameShape {
         this.height = height;
         this.color = color;
     }
+    
+
+    @Override
+    public double getX() { return x; }
+    @Override
+    public double getY() { return y; }
     
     @Override
     public boolean intersects(GameShape other) {
@@ -50,7 +57,7 @@ public class Rectangle implements GameShape {
     
   
     @Override
-    public void translate(double dx, double dy) {
+    public void move(double dx, double dy) {
         x += dx;
         y += dy;
     }
@@ -71,4 +78,6 @@ public class Rectangle implements GameShape {
     public GameShape clone() {
         return new Rectangle(x, y, width, height, color);
     }
+
+    
 }

@@ -25,6 +25,20 @@ public class GameModel extends Observable {
         totalScore = 0;
     }
 
+    public boolean validateMove(double newX, double newY) {
+        for (GameShape red : redShapes) {
+            if (red.contains(new Point((int)newX, (int)newY))) {
+                return false;
+            }
+        }
+        for (GameShape blue : blueShapes) {
+            if (blue.contains(new Point((int)newX, (int)newY))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void generateRedShapes(int count, int panelWidth, int panelHeight) {
         state = GameState.RED_VISIBLE;
   
