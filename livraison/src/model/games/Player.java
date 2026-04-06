@@ -83,7 +83,6 @@ public class Player {
         }
     }
     
-    
     public void reset() {
         totalScore = 0;
         levelsCompleted = 0;

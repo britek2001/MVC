@@ -21,9 +21,11 @@ public class RandomGenerationStrategy implements ShapeGenerationStrategy {
             switch (type) {
                 case 0:
                     shapes.add(new Rectangle(x, y, random.nextInt(80) + 20,  random.nextInt(80) + 20, Color.RED));
+                    System.out.println("Created rectangle  (" + x + ", " + y + ")");
                     break;
                 case 1:
                     shapes.add(new Circle(x, y, random.nextInt(40) + 10, Color.RED));
+                    System.out.println("Created circle (" + x + ", " + y + ")");
                     break;
             }
         }

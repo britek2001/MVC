@@ -8,7 +8,6 @@ public interface GameShape extends Serializable {
     double getArea();
     public double getX();
     public double getY();
-    void draw(Graphics2D g);
     boolean contains(Point2D p);
     void move(double dx, double dy);
     void resize(double factor);

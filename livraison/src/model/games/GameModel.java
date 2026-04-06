@@ -15,6 +15,8 @@ public class GameModel extends Observable {
     private GameState state;
     private int currentLevel;
     private int totalScore;
+    private int width;
+    private int height;
     private long redShapesVisibleUntil;
     
     public GameModel() {
@@ -23,6 +25,8 @@ public class GameModel extends Observable {
         state = GameState.WAITING_FOR_RED;
         currentLevel = 0;
         totalScore = 0;
+        width = 900;
+        height = 900;
     }
 
     public boolean validateMove(double newX, double newY) {
@@ -40,8 +44,14 @@ public class GameModel extends Observable {
     }
 
     public void generateRedShapes(int count, int panelWidth, int panelHeight) {
+        
+        if(panelWidth >= this.width  || panelHeight >= this.height){
+            System.out.println("Panel must be with this sizes" + this.width + "x" + this.height);
+            return;
+        }
+
         state = GameState.RED_VISIBLE;
-  
+
         List<GameShape> newRedShapes = generationStrategy.generateShapes(count, panelWidth, panelHeight);
         
         for (GameShape shape : newRedShapes) {
