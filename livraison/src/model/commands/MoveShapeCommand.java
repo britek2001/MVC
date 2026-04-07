@@ -9,7 +9,7 @@ public class MoveShapeCommand implements Command{
     private double oldX, oldY;
     private double newX, newY;
     
-    private MoveShapeCommand(GameModel model, GameShape shape, double newX, double newY){
+    public MoveShapeCommand(GameModel model, GameShape shape, double newX, double newY){
         this.model = model;
         this.shape = shape;
         this.oldX = shape.getX();
@@ -28,8 +28,8 @@ public class MoveShapeCommand implements Command{
 
     @Override
     public void undo(){
-        if(model.validateMove(newX, newY)){
-            shape.move(newX + -oldX, newY - oldY);
+        if(model.validateMove(oldX, oldY)){
+            shape.move(oldX - newX, oldY - newY);
         }
     }
 

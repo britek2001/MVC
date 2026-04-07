@@ -7,7 +7,7 @@ public class DeleteShapeCommand implements Command{
     private GameShape shape;
     private int index; 
 
-    private DeleteShapeCommand(GameModel model, GameShape shape){
+    public DeleteShapeCommand(GameModel model, GameShape shape){
         this.model = model;
         this.shape = shape;
     }

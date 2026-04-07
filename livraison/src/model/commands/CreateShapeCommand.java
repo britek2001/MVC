@@ -7,7 +7,7 @@ public class CreateShapeCommand implements Command{
     private GameShape shape;
     private int index; 
 
-    private CreateShapeCommand(GameModel model, GameShape shape){
+    public CreateShapeCommand(GameModel model, GameShape shape){
         this.model = model;
         this.shape = shape;
     }

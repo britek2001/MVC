@@ -5,8 +5,9 @@ import mvc.model.strategies.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
 import mvc.model.shapes.GameShape;
+import java.util.Observable; 
+
 
 public class GameModel extends Observable {
     private List<GameShape> redShapes;
@@ -59,7 +60,7 @@ public class GameModel extends Observable {
         }
 
         nextLevel();
-        setChanged();
+        setChanged(); 
         notifyObservers();
     }
     public boolean canPlaceBlueShape(GameShape shape) {
@@ -105,6 +106,7 @@ public class GameModel extends Observable {
         currentLevel++;
     }
     
+
     public int getLevel(){ return currentLevel;}
     public long getRedVisibleTime(){ return redShapesVisibleUntil;}
     public List<GameShape> getRedShapes() { return redShapes; }
