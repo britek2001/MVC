@@ -5,7 +5,6 @@ import mvc.model.commands.*;
 import mvc.model.shapes.Rectangle;
 import mvc.model.shapes.Circle;
 import mvc.model.game.GameModel;
-import mvc.model.game.GameObserver;
 import mvc.model.strategies.RandomGenerationStrategy;
 import mvc.model.strategies.ShapeGenerationStrategy;
 import java.awt.*;
@@ -13,7 +12,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observer;
 
 public class Main {
     private static List<Command> commandHistory = new ArrayList<>();
@@ -25,7 +23,7 @@ public class Main {
         GameModel game = new GameModel();
         
         // Add Observer to listen for model changes
-        game.addObserver(msg -> System.out.println("  [OBSERVER] " + msg));
+        game.addObserver((obs, arg) -> System.out.println("  [OBSERVER] " + arg));
         
         ShapeGenerationStrategy strategy = new RandomGenerationStrategy();
         System.out.println("The used Strategy " + strategy.getStrategyName());

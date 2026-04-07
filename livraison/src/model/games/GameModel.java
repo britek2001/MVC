@@ -50,18 +50,13 @@ public class GameModel extends Observable {
             System.out.println("Panel must be with this sizes" + this.width + "x" + this.height);
             return;
         }
-
         state = GameState.RED_VISIBLE;
-
         List<GameShape> newRedShapes = generationStrategy.generateShapes(count, panelWidth, panelHeight);
-        
         for (GameShape shape : newRedShapes) {
             redShapes.add(shape);
         }
-
         nextLevel();
-        setChanged(); 
-        notifyObservers();
+        modelChanged("RED_SHAPES_GENERATED");
     }
     public boolean canPlaceBlueShape(GameShape shape) {
         for (GameShape red : redShapes) {
@@ -85,9 +80,8 @@ public class GameModel extends Observable {
                 int score = calculateScore();
                 totalScore += score;
             }
-            
-            setChanged();
-            notifyObservers();
+
+            modelChanged("BLUE_SHAPE_ADDED");
         }
     }
     public int calculateScore() {
@@ -99,13 +93,13 @@ public class GameModel extends Observable {
     }
     public void removeBlueShape(GameShape shape) {
         blueShapes.remove(shape);
-        setChanged();
-        notifyObservers();
+        modelChanged("BLUE_SHAPE_REMOVED");
     }
     public void nextLevel() {
         currentLevel++;
     }
     
+   
 
     public int getLevel(){ return currentLevel;}
     public long getRedVisibleTime(){ return redShapesVisibleUntil;}
@@ -119,6 +113,13 @@ public class GameModel extends Observable {
     public boolean areRedShapesVisible() {
         return true;
     }
+
+
+    public void modelChanged(String event) {
+        setChanged();
+        notifyObservers(event);
+    }
+
     public void getStatistics () {
         System.out.printf("========== GAME STATISTICS  %s ==========%n", currentLevel);
         System.out.println("Total Score: " + totalScore);

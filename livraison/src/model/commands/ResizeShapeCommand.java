@@ -21,17 +21,20 @@ public class ResizeShapeCommand implements Command {
     public void execut() {
         if (newX == 0) return;
         shape.resize(newX);
+        model.modelChanged("BLUE_SHAPE_RESIZED");
     }
 
     @Override
     public void undo() {
         if (newX == 0) return;
         shape.resize(1 / newX);
+        model.modelChanged("BLUE_SHAPE_RESIZE_UNDO");
     }
 
     @Override
     public void redo() {
         if (newX == 0) return;
         shape.resize(newX);
+        model.modelChanged("BLUE_SHAPE_RESIZE_REDO");
     }
 }

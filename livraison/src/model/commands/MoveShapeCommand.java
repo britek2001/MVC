@@ -23,6 +23,7 @@ public class MoveShapeCommand implements Command{
     public void execut(){
         if(model.validateMove(newX, newY)){
              shape.move(newX - oldX, newY - oldY);
+             model.modelChanged("BLUE_SHAPE_MOVED");
         }
     }
 
@@ -30,6 +31,7 @@ public class MoveShapeCommand implements Command{
     public void undo(){
         if(model.validateMove(oldX, oldY)){
             shape.move(oldX - newX, oldY - newY);
+            model.modelChanged("BLUE_SHAPE_MOVE_UNDO");
         }
     }
 
@@ -37,6 +39,7 @@ public class MoveShapeCommand implements Command{
     public void redo(){
         if(model.validateMove(newX, newY)){
             shape.move(newX - oldX, newY - oldY);
+            model.modelChanged("BLUE_SHAPE_MOVE_REDO");
         }
     }
 
