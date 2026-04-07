@@ -1,9 +1,9 @@
-package mvc.model.game;
+package model.games;
 
 public enum GameState {
     WAITING_FOR_RED,
     RED_VISIBLE,
     PLACING_BLUE,
-    LEVEL_FINISH,
-    GAME_OVER
+    LEVEL_COMPLETE,
+    GAME_OVER,
 }

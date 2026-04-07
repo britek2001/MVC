@@ -1,12 +1,16 @@
-package mvc.model.game;
 
 
-import mvc.model.strategies.*;
+package model.games;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import mvc.model.shapes.GameShape;
 import java.util.Observable; 
+import model.shapes.GameShape;
+import model.strategy.ShapeGenerationStrategy;
+
+
+
+
 
 
 public class GameModel extends Observable {
@@ -43,6 +47,18 @@ public class GameModel extends Observable {
         }
         return true;
     }
+
+    public GameShape findBlueShapeAt(int x, int y) {
+    Point p = new Point(x, y);
+
+    for (GameShape shape : blueShapes) {
+        if (shape.contains(p)) {
+            return shape;
+        }
+    }
+
+     return null;
+   }
 
     public void generateRedShapes(int count, int panelWidth, int panelHeight) {
         

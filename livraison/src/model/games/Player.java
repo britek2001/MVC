@@ -1,6 +1,6 @@
-package mvc.model.game;
+package model.games;
 
-import mvc.model.shapes.GameShape;
+import model.shapes.GameShape;
 import java.util.ArrayList;
 import java.util.List;
 

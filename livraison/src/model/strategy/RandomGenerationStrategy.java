@@ -1,11 +1,11 @@
-package mvc.model.strategies;
-import mvc.model.shapes.GameShape;
+package model.strategy;
+import model.shapes.GameShape;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import mvc.model.shapes.Rectangle;
-import mvc.model.shapes.Circle;
+import model.shapes.Rectangle;
+import model.shapes.Circle;
 
 public class RandomGenerationStrategy implements ShapeGenerationStrategy {
     private Random random = new Random();

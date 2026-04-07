@@ -1,4 +1,4 @@
-package mvc.model.view;
+package model.view;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -7,8 +7,8 @@ import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -19,15 +19,14 @@ import java.util.Observer;
 import java.util.Random;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-
-import mvc.model.commands.Command;
-import mvc.model.commands.CreateShapeCommand;
-import mvc.model.commands.DeleteShapeCommand;
-import mvc.model.game.GameModel;
-import mvc.model.game.GameState;
-import mvc.model.shapes.GameShape;
-import mvc.model.shapes.Rectangle;
-import mvc.model.shapes.Circle;
+import model.commands.Command;
+import model.commands.CreateShapeCommand;
+import model.commands.DeleteShapeCommand;
+import model.games.GameModel;
+import model.games.GameState;
+import model.shapes.Circle;
+import model.shapes.GameShape;
+import model.shapes.Rectangle;
 
 public class GameView  extends JPanel implements Observer, MouseListener {
 
