@@ -115,6 +115,6 @@ public class Player {
     
     @Override
     public String toString() {
-        return name + " - Puntuación: " + totalScore;
+        return name + " - Puntuations : " + totalScore;
     }
 }

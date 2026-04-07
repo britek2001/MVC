@@ -1,3 +1,3 @@
-public interface Observateur {
+interface Observateur {
     void mettreAJour();
 }
