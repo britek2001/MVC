@@ -15,4 +15,4 @@ public class GameView implements Observer {
             System.out.println("Blue supprimée");
         }
     }
-}
+}// test modification by Taiwan
