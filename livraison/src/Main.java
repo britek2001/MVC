@@ -22,9 +22,8 @@ public class Main {
         Player player2 = new Player("Taiwen");
         GameModel game = new GameModel();
         
-        // Add Observer to listen for model changes
-        game.addObserver((obs, arg) -> System.out.println("  [OBSERVER] " + arg));
-        
+        GameView view = new GameView();
+        game.addObserver(view);
         ShapeGenerationStrategy strategy = new RandomGenerationStrategy();
         System.out.println("The used Strategy " + strategy.getStrategyName());
         game.setGenerationStrategy(strategy);
@@ -32,6 +31,7 @@ public class Main {
         game.getStatistics();
         game.generateRedShapes(4, 800, 600);
         game.getStatistics();
+        
         System.out.println("⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅Test the intersection Jugador genera Figura Azul ⋅⋅⋅********************");
         // Crear figura en la misma posicion 
         Rectangle blueRect0 = new Rectangle(100, 100, 50, 50, Color.BLUE);

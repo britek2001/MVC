@@ -119,7 +119,6 @@ public class GameModel extends Observable {
         setChanged();
         notifyObservers(event);
     }
-
     public void getStatistics () {
         System.out.printf("========== GAME STATISTICS  %s ==========%n", currentLevel);
         System.out.println("Total Score: " + totalScore);
