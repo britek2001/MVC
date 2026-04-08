@@ -11,7 +11,6 @@ public class ClickPlacementStrategy implements ShapeGenerationStrategy {
 
     @Override
     public List<GameShape> generateShapes(int count, int panelWidth, int panelHeight) {
-        // Non aléatoire: distribution déterministe sur une grille simple
         List<GameShape> shapes = new ArrayList<>();
         if (count <= 0) {
             return shapes;
@@ -37,7 +36,6 @@ public class ClickPlacementStrategy implements ShapeGenerationStrategy {
                 created++;
             }
         }
-
         return shapes;
     }
 

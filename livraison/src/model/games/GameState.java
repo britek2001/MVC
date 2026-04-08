@@ -6,5 +6,7 @@ public enum GameState {
     RED_NOT_VISIBLE,    
     PLACING_BLUE,
     LEVEL_COMPLETE,
-    GAME_OVER
+    GAME_OVER, 
+    MOVING_SHAPE,
+    RESIZING_SHAPE
 }

@@ -50,9 +50,7 @@ public class GameView  extends JPanel implements Observer, MouseListener {
         setBackground(Color.WHITE);
         setLayout(new BorderLayout());
         initializeControls();
-
         addMouseListener(this);
-
         if (controller != null) {
             addMouseListener(controller);
             addMouseMotionListener(controller);
@@ -90,12 +88,11 @@ public class GameView  extends JPanel implements Observer, MouseListener {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         GameState state = model.getState();
-        if (state == GameState.RED_VISIBLE || state == GameState.WAITING_FOR_RED || state == GameState.PLACING_BLUE) {
+        if (state == GameState.RED_VISIBLE || state == GameState.WAITING_FOR_RED ||  state == GameState.LEVEL_COMPLETE || state == GameState.PLACING_BLUE) {
             model.getRedShapes().forEach(shape -> drawShape(g2, shape));
         }
         model.getBlueShapes().forEach(shape -> drawShape(g2, shape));
         
-        // Dibujar preview del drag & drop
         if (controller != null && controller instanceof ControleurSouris) {
             ControleurSouris cs = (ControleurSouris) controller;
             drawDragPreview(g2, cs);
@@ -104,10 +101,12 @@ public class GameView  extends JPanel implements Observer, MouseListener {
         g2.setColor(Color.BLACK);
         g2.drawString("État: " + state, 10, 20);
         g2.drawString("Score: " + model.getTotalScore(), 10, 40);
-        g2.drawString("Bleues: " + model.getBlueShapes().size(), 10, 60);
+        g2.drawString("Bleues posées (niveau): " + model.getBlueShapesPlacedThisLevel() + "/" + model.getBlueShapesPerLevel(), 10, 60);
         g2.drawString("Rouges: " + model.getRedShapes().size(), 10, 80);
         g2.drawString("Nivel: " + model.getLevel(), 10, 100);
         g2.drawString("Red Visible Time: " + model.getRedVisibleTime() + " ms", 10, 120);
+        g2.drawString("Objectif: poser exactement " + model.getBlueShapesPerLevel() + " formes bleues", 10, 140);
+        g2.drawString("Restantes: " + model.getBlueShapesRemainingForLevel(), 10, 160);
     }
 
     private void drawShape(Graphics2D g2, GameShape shape) {
@@ -198,7 +197,13 @@ public class GameView  extends JPanel implements Observer, MouseListener {
 
         JButton deleteButton = new JButton("Delete");
         deleteButton.addActionListener(e -> deleteSelectedShape());
-
+        
+        JButton moveButton = new JButton("Move");
+        moveButton.addActionListener(e -> deleteSelectedShape());
+        
+        JButton resizeButton = new JButton("Resize");
+        resizeButton.addActionListener(e -> deleteSelectedShape());
+        
         JButton undoButton = new JButton("Undo");
         undoButton.addActionListener(e -> undoLastCommand());
 
@@ -211,7 +216,6 @@ public class GameView  extends JPanel implements Observer, MouseListener {
         controls.add(deleteButton);
         controls.add(undoButton);
         controls.add(redoButton);
-
         add(controls, BorderLayout.SOUTH);
     }
 
@@ -229,19 +233,6 @@ public class GameView  extends JPanel implements Observer, MouseListener {
         repaint();
     }
 
-    private void createRandomCircle() {
-        double radius = 20 + random.nextInt(40);
-        int panelWidth = Math.max(getWidth(), 900);
-        int panelHeight = Math.max(getHeight(), 700);
-        double x = 20 + random.nextInt(Math.max(1, panelWidth - 160));
-        double y = 20 + random.nextInt(Math.max(1, panelHeight - 220));
-
-        Circle circle = new Circle(x, y, radius, Color.BLUE);
-        executeAndStore(new CreateShapeCommand(model, circle));
-        selectedShape = circle;
-        repaint();
-    }
-
     private void deleteSelectedShape() {
         GameShape shape = getTargetShape();
         if (shape == null) {
@@ -254,6 +245,15 @@ public class GameView  extends JPanel implements Observer, MouseListener {
     }
 
     private void undoLastCommand() {
+        if (controller instanceof ControleurSouris) {
+            boolean undone = ((ControleurSouris) controller).undoLastCommand();
+            if (undone) {
+                model.modelChanged("UNDO");
+                repaint();
+                return;
+            }
+        }
+
         if (undoStack.isEmpty()) {
             return;
         }
@@ -266,10 +266,18 @@ public class GameView  extends JPanel implements Observer, MouseListener {
     }
 
     private void redoLastCommand() {
+        if (controller instanceof ControleurSouris) {
+            boolean redone = ((ControleurSouris) controller).redoLastCommand();
+            if (redone) {
+                model.modelChanged("REDO");
+                repaint();
+                return;
+            }
+        }
+
         if (redoStack.isEmpty()) {
             return;
         }
-
         Command command = redoStack.pop();
         command.redo();
         undoStack.push(command);

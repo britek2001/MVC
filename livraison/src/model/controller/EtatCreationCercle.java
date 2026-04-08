@@ -1,18 +1,15 @@
 package mvc.model.controller;
 
 import java.awt.Color;
+import java.awt.event.MouseEvent;
 import mvc.model.game.GameModel;
-import mvc.model.strategies.ClickPlacementStrategy;
-import mvc.model.strategies.ShapeGenerationStrategy;
 import mvc.model.shapes.Circle;
+import mvc.model.strategies.ShapeGenerationStrategy;
+import mvc.model.strategies.ClickPlacementStrategy;
 
 public class EtatCreationCercle implements EtatInteraction {
-
     private GameModel modele;
-    private int startX;
-    private int startY;
-    private int currentX;
-    private int currentY;
+    private int startX, startY, currentX, currentY;
     private boolean isDragging = false;
 
     public EtatCreationCercle(GameModel modele) {
@@ -20,59 +17,58 @@ public class EtatCreationCercle implements EtatInteraction {
     }
 
     @Override
-    public void sourisAppuyee(int x, int y) {
+    public void sourisAppuyee(MouseEvent e, ControleurSouris controller) {
         if (!isDragging) {
-            startX = x;
-            startY = y;
-            currentX = x;
-            currentY = y;
+            startX = e.getX();
+            startY = e.getY();
+            currentX = startX;
+            currentY = startY;
             isDragging = true;
             modele.modelChanged("DRAG_START");
-            return;
         }
-
-        currentX = x;
-        currentY = y;
-        double rayon = Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
-
-        if (rayon < 10) {
-            isDragging = false;
-            modele.modelChanged("DRAG_END");
-            return;
-        }
-
-        ShapeGenerationStrategy strategy = modele.getGenerationStrategy();
-        Circle cercle;
-        if (strategy instanceof ClickPlacementStrategy) {
-            cercle = ((ClickPlacementStrategy) strategy)
-                    .createCircleFromClicks(startX, startY, currentX, currentY, Color.BLUE);
-        } else {
-            cercle = new Circle(startX, startY, rayon, Color.BLUE);
-        }
-        modele.addBlueShape(cercle);
-
-        isDragging = false;
-        modele.modelChanged("DRAG_END");
     }
 
     @Override
-    public void sourisDeplacee(int x, int y) {
+    public void sourisDeplacee(MouseEvent e, ControleurSouris controller) {
         if (isDragging) {
-            currentX = x;
-            currentY = y;
+            currentX = e.getX();
+            currentY = e.getY();
             modele.modelChanged("DRAG_UPDATE");
         }
     }
 
     @Override
-    public void sourisRelachee(int x, int y) {
-        // A faire 
+    public void sourisRelachee(MouseEvent e, ControleurSouris controller) {
+        if (isDragging) {
+            double rayon = Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
+
+            if (rayon < 10) {
+                isDragging = false;
+                modele.modelChanged("DRAG_END");
+                controller.changerEtat(new EtatSelection(modele));
+                return;
+            }
+
+            ShapeGenerationStrategy strategy = modele.getGenerationStrategy();
+            Circle cercle;
+            if (strategy instanceof ClickPlacementStrategy) {
+                cercle = ((ClickPlacementStrategy) strategy)
+                        .createCircleFromClicks(startX, startY, currentX, currentY, Color.BLUE);
+            } else {
+                cercle = new Circle(startX, startY, rayon, Color.BLUE);
+            }
+            modele.addBlueShape(cercle);
+
+            isDragging = false;
+            modele.modelChanged("DRAG_END");
+            controller.changerEtat(new EtatSelection(modele));
+        }
     }
 
-    public boolean isDragging() {
-        return isDragging;
-    }
+    @Override
+    public void sourisBougee(MouseEvent e, ControleurSouris controller) {}
 
+    public boolean isDragging() { return isDragging; }
     public int getStartX() { return startX; }
     public int getStartY() { return startY; }
     public int getCurrentX() { return currentX; }

@@ -13,11 +13,15 @@ import mvc.model.view.GameView;
 import mvc.model.game.LevelConfig;
 import java.util.Map;
 
+
 public class GameModel extends Observable {
+
+    private static final int BLUE_SHAPES_PER_LEVEL = 4;
     private boolean redShapesVisible = true;
     private final Timer timer = new Timer(true); 
     private List<GameShape> redShapes;
     private List<GameShape> blueShapes;
+    private int blueShapesPlacedThisLevel;
     private ShapeGenerationStrategy generationStrategy;
     private GameState state;
     private int currentLevel;
@@ -34,8 +38,9 @@ public class GameModel extends Observable {
         state = GameState.WAITING_FOR_RED;
         currentLevel = 0;
         totalScore = 0;
-        width = 900;
-        height = 900;
+        width = 800;
+        height = 600;
+        blueShapesPlacedThisLevel = 0;
     }
 
     public boolean areRedShapesVisible() {
@@ -82,28 +87,41 @@ public class GameModel extends Observable {
     }
 
     public void generateRedShapes(int count, int panelWidth, int panelHeight) {       
+        
         if(panelWidth < this.width  || panelHeight < this.height){
             System.out.println("Panel must be at least this size: " + this.width + "x" + this.height);
+            return;
+        }
+
+        if (generationStrategy == null) {
+            System.out.println("ERROR: No generation strategy set!");
             return;
         }
         
         int levelToGenerate = Math.min(currentLevel + 1, MAX_LEVEL);
         LevelConfig cfg = getLevelConfig(levelToGenerate);
-        count = Math.min(count, cfg.redShapeCount); // Ensure count does not exceed the configured limit
+        count = Math.min(count, cfg.redShapeCount);
         
         redShapes.clear();
+        blueShapes.clear();
+        blueShapesPlacedThisLevel = 0;
         showRedShapes();
         redShapesVisibleUntil = System.currentTimeMillis() + (cfg.timeSeconds * 1000L);
-        modelChanged("RED_SHAPES_GENERATED");
-
-        List<GameShape> newRedShapes = generationStrategy.generateShapes(count, panelWidth, panelHeight);
+        
+        List<GameShape> newRedShapes = generationStrategy.generateShapes(count, panelWidth, panelHeight);  
+        if (newRedShapes == null || newRedShapes.isEmpty()) {
+            System.out.println("ERROR: No shapes generated!");
+            return;
+        }
+        
         redShapes.addAll(newRedShapes);
+        System.out.println(" Generated " + redShapes.size() + " red shapes");
         modelChanged("RED_SHAPES_GENERATED");
 
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                hideRedShapes(); // contient déjà modelChanged(...)
+                hideRedShapes();
             }
         }, cfg.timeSeconds * 1000L);
         nextLevel();
@@ -126,15 +144,22 @@ public class GameModel extends Observable {
     }
 
     public boolean addBlueShape(GameShape shape) {
+        
+        if (blueShapesPlacedThisLevel >= BLUE_SHAPES_PER_LEVEL) {
+            modelChanged("BLUE_LIMIT_REACHED");
+            return false;
+        }
+
         if ( canPlaceBlueShape(shape)) {
             blueShapes.add(shape);
-            System.out.println("Blue shape added. Total blue shapes: " + blueShapes.size());
-            if (blueShapes.size() == 40) {
-                System.out.println("Maximum number of blue shapes reached. Ending game.");
+            blueShapesPlacedThisLevel++;
+            System.out.println("Blue shape added. Level blue shapes: " + blueShapesPlacedThisLevel + "/" + BLUE_SHAPES_PER_LEVEL);
+            if (blueShapesPlacedThisLevel == BLUE_SHAPES_PER_LEVEL) {
                 System.out.println("Level " + currentLevel + " complete! Score: " + calculateScore());
                 state = GameState.LEVEL_COMPLETE;
                 int score = calculateScore();
                 totalScore += score;
+                modelChanged("LEVEL_COMPLETE");
             }
             System.out.println("Current total score: " + totalScore);
             modelChanged("BLUE_SHAPE_ADDED");
@@ -174,6 +199,9 @@ public class GameModel extends Observable {
 
     public int getLevel(){ return currentLevel;}
     public long getRedVisibleTime(){ return redShapesVisibleUntil;}
+    public int getBlueShapesPerLevel() { return BLUE_SHAPES_PER_LEVEL; }
+    public int getBlueShapesPlacedThisLevel() { return blueShapesPlacedThisLevel; }
+    public int getBlueShapesRemainingForLevel() { return Math.max(0, BLUE_SHAPES_PER_LEVEL - blueShapesPlacedThisLevel); }
     public List<GameShape> getRedShapes() { return redShapes; }
     public List<GameShape> getBlueShapes() { return blueShapes; }
     public ShapeGenerationStrategy getGenerationStrategy() { return generationStrategy; }
@@ -181,6 +209,10 @@ public class GameModel extends Observable {
         this.generationStrategy = strategy; 
     }
     public GameState getState() { return state; }
+    public void setState(GameState state) {
+        this.state = state;
+        modelChanged("STATE_CHANGED");
+    }
     public int getTotalScore() { return totalScore; }
 
 
@@ -188,6 +220,7 @@ public class GameModel extends Observable {
         setChanged();
         notifyObservers(event);
     }
+    
     public void getStatistics () {
         System.out.printf("========== GAME STATISTICS  %s ==========%n", currentLevel);
         System.out.println("Total Score: " + totalScore);
@@ -196,6 +229,7 @@ public class GameModel extends Observable {
         System.out.println("Red Visible Time: " + redShapesVisibleUntil);
         System.out.println("Reds: " + getRedShapes().size());
         System.out.println("Blues: " + getBlueShapes().size());
+        System.out.println("Blue placed this level: " + getBlueShapesPlacedThisLevel() + "/" + getBlueShapesPerLevel());
         System.out.println();
     }
 }

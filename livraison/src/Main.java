@@ -4,12 +4,14 @@ import mvc.model.game.Player;
 import mvc.model.commands.*;
 import mvc.model.controller.ControleurSouris;
 import mvc.model.controller.EtatCreationRectangle;
+import mvc.model.controller.EtatSelection;
 import mvc.model.shapes.Rectangle;
 import mvc.model.shapes.Circle;
 import mvc.model.shapes.GameShape;
 import mvc.model.game.GameModel;
 import mvc.model.strategies.ClickPlacementStrategy;
 import mvc.model.strategies.ShapeGenerationStrategy;
+import mvc.model.strategies.RandomGenerationStrategy;
 import mvc.model.view.GameView;
 import java.awt.*;
 import java.awt.geom.Point2D;
@@ -32,10 +34,11 @@ public class Main {
         Player player2 = new Player("Taiwen");
         GameModel game = new GameModel();
 
-        ShapeGenerationStrategy strategy = new ClickPlacementStrategy();
+        // ShapeGenerationStrategy strategy = new ClickPlacementStrategy();
+        ShapeGenerationStrategy strategy = new RandomGenerationStrategy();
         System.out.println("The used Strategy " + strategy.getStrategyName());
         game.setGenerationStrategy(strategy);
-        ControleurSouris controleurSouris = new ControleurSouris(new EtatCreationRectangle(game));
+        ControleurSouris controleurSouris = new ControleurSouris(new EtatSelection(game));
 
         SwingUtilities.invokeLater(() -> {
             GameView view = new GameView(game, controleurSouris);
@@ -49,16 +52,13 @@ public class Main {
 
         System.out.println("⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅Initialisation data paremeters⋅⋅⋅********************");
         game.getStatistics();
-        game.generateRedShapes(4, 800, 600);
-
+        game.generateRedShapes(4, 900, 890);
         // Default startup shapes created through Command pattern
-        Rectangle startupRect = new Rectangle(120, 120, 60, 60, Color.BLUE);
-        Circle startupCircle = new Circle(260, 220, 35, Color.BLUE);
-        executeCommand(CommandType.CREATE, game, startupRect, 0, 0);
-        executeCommand(CommandType.CREATE, game, startupCircle, 0, 0);
-
+        //Rectangle startupRect = new Rectangle(120, 120, 60, 60, Color.BLUE);
+        //Circle startupCircle = new Circle(260, 220, 35, Color.BLUE);
+        //executeCommand(CommandType.CREATE, game, startupRect, 0, 0);
+        //executeCommand(CommandType.CREATE, game, startupCircle, 0, 0);
         game.getStatistics();
-
         System.out.println("⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ TEST ********************");
         //System.out.println("\n⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅Testing Commands Pattern⋅⋅⋅********************");
         //testCommands(game);
@@ -118,7 +118,7 @@ public class Main {
                 command = new DeleteShapeCommand(game, shape);
                 break;
             case MOVE:
-                command = new MoveShapeCommand(game, shape, value1, value2);
+                command = new MoveShapeCommand(game, shape, shape.getX(), shape.getY(), value1, value2);
                 break;
             case RESIZE:
                 command = new ResizeShapeCommand(game, shape, value1, value2);
