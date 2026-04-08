@@ -35,6 +35,7 @@ public class GameView  extends JPanel implements Observer, MouseListener {
     private MouseAdapter controller; 
     private final Random random = new Random();
     private GameShape selectedShape;
+    
     private final Deque<Command> undoStack = new ArrayDeque<>();
     private final Deque<Command> redoStack = new ArrayDeque<>();
 

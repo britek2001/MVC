@@ -58,7 +58,7 @@ public class Main {
 
         System.out.println("⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ TEST ********************");
         //System.out.println("\n⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅Testing Commands Pattern⋅⋅⋅********************");
-        testCommands(game);
+        //testCommands(game);
         //System.out.println("\n⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅PLAYERS STATS⋅⋅⋅********************");
         //System.out.printf("%s %n", player1.getStatistics()); 
         //System.out.printf("%s %n", player2.getStatistics());

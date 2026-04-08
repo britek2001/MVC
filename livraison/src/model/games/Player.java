@@ -76,7 +76,6 @@ public class Player {
         levelScores.add(score);
         areasPerLevel.add(totalArea);
         totalBlueShapesPlaced += 4;
-        
         if (levelStartTime > 0) {
             long levelTime = System.currentTimeMillis() - levelStartTime;
             totalTimeSpent += levelTime;
