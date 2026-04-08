@@ -156,6 +156,17 @@ public class GameModel extends Observable {
         modelChanged("BLUE_SHAPE_REMOVED");
     }
 
+    public GameShape findBlueShapeAt(int x, int y) {
+        Point point = new Point(x, y);
+        for (int i = blueShapes.size() - 1; i >= 0; i--) {
+            GameShape shape = blueShapes.get(i);
+            if (shape.contains(point)) {
+                return shape;
+            }
+        }
+        return null;
+    }
+
     public void nextLevel() {
         currentLevel++;
     }
@@ -165,6 +176,7 @@ public class GameModel extends Observable {
     public long getRedVisibleTime(){ return redShapesVisibleUntil;}
     public List<GameShape> getRedShapes() { return redShapes; }
     public List<GameShape> getBlueShapes() { return blueShapes; }
+    public ShapeGenerationStrategy getGenerationStrategy() { return generationStrategy; }
     public void setGenerationStrategy(ShapeGenerationStrategy strategy) { 
         this.generationStrategy = strategy; 
     }

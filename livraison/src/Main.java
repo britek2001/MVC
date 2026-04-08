@@ -2,11 +2,13 @@ import javax.swing.*;
 
 import mvc.model.game.Player;
 import mvc.model.commands.*;
+import mvc.model.controller.ControleurSouris;
+import mvc.model.controller.EtatCreationRectangle;
 import mvc.model.shapes.Rectangle;
 import mvc.model.shapes.Circle;
 import mvc.model.shapes.GameShape;
 import mvc.model.game.GameModel;
-import mvc.model.strategies.RandomGenerationStrategy;
+import mvc.model.strategies.ClickPlacementStrategy;
 import mvc.model.strategies.ShapeGenerationStrategy;
 import mvc.model.view.GameView;
 import java.awt.*;
@@ -30,12 +32,13 @@ public class Main {
         Player player2 = new Player("Taiwen");
         GameModel game = new GameModel();
 
-        ShapeGenerationStrategy strategy = new RandomGenerationStrategy();
+        ShapeGenerationStrategy strategy = new ClickPlacementStrategy();
         System.out.println("The used Strategy " + strategy.getStrategyName());
         game.setGenerationStrategy(strategy);
+        ControleurSouris controleurSouris = new ControleurSouris(new EtatCreationRectangle(game));
 
         SwingUtilities.invokeLater(() -> {
-            GameView view = new GameView(game, null);
+            GameView view = new GameView(game, controleurSouris);
             JFrame frame = new JFrame("Rectangle and Circle Game "+ strategy.getStrategyName());
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setContentPane(view);

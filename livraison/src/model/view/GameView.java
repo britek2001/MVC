@@ -23,6 +23,10 @@ import javax.swing.JPanel;
 import mvc.model.commands.Command;
 import mvc.model.commands.CreateShapeCommand;
 import mvc.model.commands.DeleteShapeCommand;
+import mvc.model.controller.ControleurSouris;
+import mvc.model.controller.EtatCreationRectangle;
+import mvc.model.controller.EtatCreationCercle;
+import mvc.model.controller.EtatInteraction;
 import mvc.model.game.GameModel;
 import mvc.model.game.GameState;
 import mvc.model.shapes.GameShape;
@@ -90,12 +94,19 @@ public class GameView  extends JPanel implements Observer, MouseListener {
             model.getRedShapes().forEach(shape -> drawShape(g2, shape));
         }
         model.getBlueShapes().forEach(shape -> drawShape(g2, shape));
+        
+        // Dibujar preview del drag & drop
+        if (controller != null && controller instanceof ControleurSouris) {
+            ControleurSouris cs = (ControleurSouris) controller;
+            drawDragPreview(g2, cs);
+        }
+        
         g2.setColor(Color.BLACK);
         g2.drawString("État: " + state, 10, 20);
         g2.drawString("Score: " + model.getTotalScore(), 10, 40);
         g2.drawString("Bleues: " + model.getBlueShapes().size(), 10, 60);
         g2.drawString("Rouges: " + model.getRedShapes().size(), 10, 80);
-        g2.drawString("Niveau: " + model.getLevel(), 10, 100);
+        g2.drawString("Nivel: " + model.getLevel(), 10, 100);
         g2.drawString("Red Visible Time: " + model.getRedVisibleTime() + " ms", 10, 120);
     }
 
@@ -124,14 +135,63 @@ public class GameView  extends JPanel implements Observer, MouseListener {
         }
     }
 
+    private void drawDragPreview(Graphics2D g2, ControleurSouris cs) {
+        EtatInteraction estado = cs.getEtatCourant();
+        
+        if (estado instanceof EtatCreationRectangle) {
+            EtatCreationRectangle est = (EtatCreationRectangle) estado;
+            if (est.isDragging()) {
+                int x = Math.min(est.getStartX(), est.getCurrentX());
+                int y = Math.min(est.getStartY(), est.getCurrentY());
+                int w = Math.abs(est.getCurrentX() - est.getStartX());
+                int h = Math.abs(est.getCurrentY() - est.getStartY());
+                
+                g2.setColor(new Color(0, 100, 200, 100)); // Azul semi-transparente
+                g2.fillRect(x, y, w, h);
+                g2.setColor(Color.BLUE);
+                g2.setStroke(new BasicStroke(2f));
+                g2.drawRect(x, y, w, h);
+            }
+        } 
+        else if (estado instanceof EtatCreationCercle) {
+            EtatCreationCercle est = (EtatCreationCercle) estado;
+            if (est.isDragging()) {
+                double rayon = Math.sqrt(Math.pow(est.getCurrentX() - est.getStartX(), 2) 
+                                       + Math.pow(est.getCurrentY() - est.getStartY(), 2));
+                
+                g2.setColor(new Color(0, 100, 200, 100)); // Azul semi-transparente
+                g2.fillOval((int)(est.getStartX() - rayon), (int)(est.getStartY() - rayon), 
+                           (int)(rayon * 2), (int)(rayon * 2));
+                g2.setColor(Color.BLUE);
+                g2.setStroke(new BasicStroke(2f));
+                g2.drawOval((int)(est.getStartX() - rayon), (int)(est.getStartY() - rayon), 
+                           (int)(rayon * 2), (int)(rayon * 2));
+            }
+        }
+    }
+
     private void initializeControls() {
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-        JButton createRectangleButton = new JButton("Rectangle");
-        createRectangleButton.addActionListener(e -> createRandomRectangle());
+        JButton createRectangleButton = new JButton("Rectangle (2 clics)");
+        createRectangleButton.addActionListener(e -> {
+            if (controller instanceof ControleurSouris) {
+                ((ControleurSouris) controller).changerEtat(
+                    new EtatCreationRectangle(model));
+                setFocusable(true);
+                requestFocus();
+            }
+        });
 
-        JButton createCircleButton = new JButton("Circle");
-        createCircleButton.addActionListener(e -> createRandomCircle());
+        JButton createCircleButton = new JButton("Circle (2 clics)");
+        createCircleButton.addActionListener(e -> {
+            if (controller instanceof ControleurSouris) {
+                ((ControleurSouris) controller).changerEtat(
+                    new EtatCreationCercle(model));
+                setFocusable(true);
+                requestFocus();
+            }
+        });
 
         JButton eliminateSelectedButton = new JButton("Eliminate Selected Figure");
         eliminateSelectedButton.addActionListener(e -> deleteSelectedShape());
