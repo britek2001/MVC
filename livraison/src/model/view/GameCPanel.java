@@ -4,7 +4,7 @@ import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-public class GameControlsPanel extends JPanel {
+public class GameCPanel extends JPanel {
 
     public GameCPanel(
             Runnable onCreateRectangle,
