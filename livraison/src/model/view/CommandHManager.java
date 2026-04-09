@@ -4,7 +4,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import mvc.model.commands.Command;
 
-public class CommandHistoryManager {
+public class CommandHManager {
     private final Deque<Command> undoStack = new ArrayDeque<>();
     private final Deque<Command> redoStack = new ArrayDeque<>();
 

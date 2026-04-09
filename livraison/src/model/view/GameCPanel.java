@@ -6,7 +6,7 @@ import javax.swing.JPanel;
 
 public class GameControlsPanel extends JPanel {
 
-    public GameControlsPanel(
+    public GameCPanel(
             Runnable onCreateRectangle,
             Runnable onCreateCircle,
             Runnable onDeleteSelected,
