@@ -46,17 +46,21 @@ public class Circle implements GameShape {
         return Math.PI * radius * radius;
     }
 
-    public int getZoneType(Point2D p) {
-        if (!contains(p)) {
-            return -1;  
+    @Override
+    public int getZoneType(Point2D point) {
+        double dx = point.getX() - getX();
+        double dy = point.getY() - getY();
+        double distance = Math.sqrt(dx * dx + dy * dy);
+
+        double innerRadius = getRadius() * CENTRAL_ZONE_RATIO;
+
+        if (distance < innerRadius) {
+            return 1;
+        } else if (distance < getRadius()) {
+            return 0;
+        } else {
+            return -1;
         }
-        double dx = p.getX() - x;
-        double dy = p.getY() - y;
-        double distance = Math.sqrt(dx * dx + dy * dy);    
-        if (distance <= radius * CENTRAL_ZONE_RATIO) {
-            return 1;  
-        }
-        return 0;  
     }
     
     @Override
