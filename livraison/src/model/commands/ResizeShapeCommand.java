@@ -1,7 +1,7 @@
-package model.commands;
-import model.games.GameModel;
-import model.shapes.GameShape;
+package mvc.model.commands;
 
+import mvc.model.game.GameModel;
+import mvc.model.shapes.GameShape;
 
 public class ResizeShapeCommand implements Command {
     private GameModel model;
@@ -23,8 +23,8 @@ public class ResizeShapeCommand implements Command {
         if (newX == 0) return;
         shape.resize(newX);
         if (model.getRedShapes().stream().anyMatch(red -> red.intersects(shape))) {
-            undo(); // Undo the resize if it intersects with a red shape
-            System.out.println("Resize undone due to intersection with a red shape.");
+            undo();
+            System.out.println(" BLUE_SHAPE_RESIZED ERROR intersect un obstacle");
         } else {
             model.modelChanged("BLUE_SHAPE_RESIZED");
         }

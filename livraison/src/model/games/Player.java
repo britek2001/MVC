@@ -1,6 +1,6 @@
-package model.games;
+package mvc.model.game;
 
-import model.shapes.GameShape;
+import mvc.model.shapes.GameShape;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,7 +94,7 @@ public class Player {
     
     public String  getStatistics() {
         StringBuilder sb = new StringBuilder();
-        sb.append(" Statistics  ").append(name).append(" ===\n");
+        sb.append(" Statistic  ").append(name).append(" ===\n");
         sb.append(" SCORE : ").append(totalScore).append("\n");
         sb.append(" LEVEL ").append(levelsCompleted).append("\n");
         sb.append(" LEVEL: ").append(String.format("%.2f", getAverageScorePerLevel())).append("\n");
@@ -114,6 +114,6 @@ public class Player {
     
     @Override
     public String toString() {
-        return name + " - Puntuations : " + totalScore;
+        return name + "Puntuations : " + totalScore;
     }
 }

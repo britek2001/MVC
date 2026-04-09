@@ -18,6 +18,9 @@ public class EtatCreationCercle implements EtatInteraction {
 
     @Override
     public void sourisAppuyee(MouseEvent e, ControleurSouris controller) {
+        if (modele.isGameFinished()) {
+            return;
+        }
         if (!isDragging) {
             startX = e.getX();
             startY = e.getY();
@@ -30,6 +33,9 @@ public class EtatCreationCercle implements EtatInteraction {
 
     @Override
     public void sourisDeplacee(MouseEvent e, ControleurSouris controller) {
+        if (modele.isGameFinished()) {
+            return;
+        }
         if (isDragging) {
             currentX = e.getX();
             currentY = e.getY();
@@ -39,6 +45,9 @@ public class EtatCreationCercle implements EtatInteraction {
 
     @Override
     public void sourisRelachee(MouseEvent e, ControleurSouris controller) {
+        if (modele.isGameFinished()) {
+            return;
+        }
         if (isDragging) {
             double rayon = Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
 
@@ -53,9 +62,9 @@ public class EtatCreationCercle implements EtatInteraction {
             Circle cercle;
             if (strategy instanceof ClickPlacementStrategy) {
                 cercle = ((ClickPlacementStrategy) strategy)
-                        .createCircleFromClicks(startX, startY, currentX, currentY, Color.BLUE);
+                        .createCircleFromClicks(startX, startY, currentX, currentY, modele.getCurrentDrawingColor());
             } else {
-                cercle = new Circle(startX, startY, rayon, Color.BLUE);
+                cercle = new Circle(startX, startY, rayon, modele.getCurrentDrawingColor());
             }
             modele.addBlueShape(cercle);
 

@@ -1,4 +1,4 @@
-package model.shapes;
+package mvc.model.shapes;
 
 import java.awt.*;
 import java.awt.geom.*;

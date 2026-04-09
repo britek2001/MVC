@@ -1,7 +1,6 @@
-package model.commands;
-
-import model.games.GameModel;
-import model.shapes.GameShape;
+package mvc.model.commands;
+import mvc.model.game.GameModel;
+import mvc.model.shapes.GameShape;
 
 public class CreateShapeCommand implements Command{
     private GameModel model;
@@ -20,12 +19,12 @@ public class CreateShapeCommand implements Command{
     public void execut(){
         boolean added = model.addBlueShape(shape);
         if(added){
-                System.out.println("Shape added successfully.");
+                System.out.println("Shape added");
                 index = model.getBlueShapes().indexOf(shape);
                 System.out.println("Index of created shape: " + index); 
                 created = index != -1;
             } else {
-                System.out.println("Failed to add shape. It may intersect with existing shapes or exceed the limit.");
+                System.out.println("Failed");
                 return; 
         }   
     }

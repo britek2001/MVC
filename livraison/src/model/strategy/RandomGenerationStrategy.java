@@ -1,11 +1,11 @@
-package model.strategy;
-import model.shapes.GameShape;
+package mvc.model.strategies;
+import mvc.model.shapes.GameShape;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import model.shapes.Rectangle;
-import model.shapes.Circle;
+import mvc.model.shapes.Rectangle;
+import mvc.model.shapes.Circle;
 
 public class RandomGenerationStrategy implements ShapeGenerationStrategy {
     private Random random = new Random();
@@ -22,11 +22,9 @@ public class RandomGenerationStrategy implements ShapeGenerationStrategy {
             switch (type) {
                 case 0:
                     shapes.add(new Rectangle(x, y, random.nextInt(80) + 20,  random.nextInt(80) + 20, Color.RED));
-                    System.out.println("Created rectangle  (" + x + ", " + y + ")");
                     break;
                 case 1:
                     shapes.add(new Circle(x, y, random.nextInt(40) + 10, Color.RED));
-                    System.out.println("Created circle (" + x + ", " + y + ")");
                     break;
             }
         }

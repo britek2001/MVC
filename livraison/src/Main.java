@@ -1,107 +1,169 @@
+import javax.swing.*;
+import mvc.model.game.LevelConfig;
+import mvc.model.game.Player;
+import mvc.model.commands.*;
+import mvc.model.controller.ControleurSouris;
+import mvc.model.controller.EtatCreationRectangle;
+import mvc.model.controller.EtatSelection;
+import mvc.model.shapes.Rectangle;
+import mvc.model.shapes.Circle;
+import mvc.model.shapes.GameShape;
+import mvc.model.game.GameModel;
+import mvc.model.strategies.ShapeGenerationStrategy;
+import mvc.model.strategies.ClickPlacementStrategy;
+import mvc.model.strategies.RandomGenerationStrategy;
+import mvc.model.view.GameView;
+import mvc.model.game.GameState;
 import java.awt.*;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.*;
-import model.commands.Command;
-import model.commands.CreateShapeCommand;
-import model.commands.DeleteShapeCommand;
-import model.commands.MoveShapeCommand;
-import model.commands.ResizeShapeCommand;
-import model.games.GameModel;
-import model.games.Player;
-import model.shapes.Circle;
-import model.shapes.GameShape;
-import model.shapes.Rectangle;
-import model.strategy.RandomGenerationStrategy;
-import model.strategy.ShapeGenerationStrategy;
-import model.view.GameView;
 
 public class Main {
+    private static final int WINDOW_WIDTH = 1180;
+    private static final int WINDOW_HEIGHT = 890;
+    private static final int INFO_PANEL_WIDTH = 400;
+    private static final int GAME_AREA_WIDTH = WINDOW_WIDTH - INFO_PANEL_WIDTH;
     private static List<Command> commandHistory = new ArrayList<>();
-
     private enum CommandType {
         CREATE,
         DELETE,
         MOVE,
         RESIZE
     }
-
+    
     public static void main(String[] args) {
-
-        Player player1 = new Player("Krim  jag ");
-        Player player2 = new Player("Taiwen");
         GameModel game = new GameModel();
-
-        // ShapeGenerationStrategy strategy = new ClickPlacementStrategy();
-        ShapeGenerationStrategy strategy = new RandomGenerationStrategy();
-        System.out.println("The used Strategy " + strategy.getStrategyName());
-        game.setGenerationStrategy(strategy);
-        ControleurSouris controleurSouris = new ControleurSouris(new EtatSelection(game));
-
+        showMenu(game);
+    }
+    
+    private static void showMenu(GameModel game) {
         SwingUtilities.invokeLater(() -> {
-            GameView view = new GameView(game, null);
-            JFrame frame = new JFrame("Rectangle and Circle Game " + strategy.getStrategyName());
+            JFrame menuFrame = new JFrame("ASI GAME");
+            menuFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            menuFrame.setSize(400, 300);
+            menuFrame.setLocationRelativeTo(null);
+
+            JPanel panel = new JPanel();
+            panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+            JLabel strategyLabel = new JLabel("Selection de strategie:");
+            String[] strategies = {"Random Generation", "Two Players"};
+            JComboBox<String> strategyComboBox = new JComboBox<>(strategies);
+
+            JLabel difficultyLabel = new JLabel("Selection de Difficulte:");
+            String[] difficulties = {"Facile", "Moyen", "Difficile", "Tres difficile", "Extreme"};
+            JComboBox<String> difficultyComboBox = new JComboBox<>(difficulties);
+
+            JButton startButton = new JButton(" Comencer le jeu ");
+            startButton.addActionListener(e -> {
+                String selectedStrategy = (String) strategyComboBox.getSelectedItem();
+                String selectedDifficulty = (String) difficultyComboBox.getSelectedItem();
+
+                int level = switch (selectedDifficulty) {
+                    case "Facile" -> 1;
+                    case "Moyen" -> 2;
+                    case "Difficile" -> 3;
+                    case "Tres difficile" -> 4;
+                    case "Extreme" -> 5;
+                    default -> 1;
+                };
+
+                if ("Two Players".equals(selectedStrategy)) {
+                    setupTwoPlayersAndStart(menuFrame, game, level);
+                    return;
+                }
+
+                ShapeGenerationStrategy strategy;
+                if ("Click".equals(selectedStrategy)) {
+                    strategy = new ClickPlacementStrategy();
+                } else {
+                    strategy = new RandomGenerationStrategy();
+                }
+
+                game.disableTwoPlayerMode();
+                game.setGenerationStrategy(strategy);
+
+                LevelConfig config = game.getLevelConfig(level);
+                game.setCurrentLevel(level - 1);
+                game.setGameAreaSize(GAME_AREA_WIDTH, WINDOW_HEIGHT);
+                game.generateRedShapes(config.redShapeCount, GAME_AREA_WIDTH, WINDOW_HEIGHT);
+
+                System.out.println("Strategy: " + selectedStrategy);
+                System.out.println("Difficulte: " + selectedDifficulty);
+                System.out.println("Temps  pour definir les formes: " + config.timeSeconds + " secondes");
+
+                menuFrame.dispose();
+                startGame(game, strategy);
+            });
+
+            panel.add(strategyLabel);
+            panel.add(strategyComboBox);
+            panel.add(difficultyLabel);
+            panel.add(difficultyComboBox);
+            panel.add(startButton);
+
+            menuFrame.add(panel);
+            menuFrame.setVisible(true);
+        });
+    }
+
+    private static void setupTwoPlayersAndStart(JFrame menuFrame, GameModel game, int level) {
+        JTextField redPlayerField = new JTextField(15);
+        JTextField bluePlayerField = new JTextField(15);
+
+        JPanel form = new JPanel(new GridLayout(0, 1, 6, 6));
+        form.add(new JLabel("Nom du joueur rouge:"));
+        form.add(redPlayerField);
+        form.add(new JLabel("Nom du joueur bleu:"));
+        form.add(bluePlayerField);
+
+        int result = JOptionPane.showConfirmDialog(
+                menuFrame,
+                form,
+                "Two Players Setup",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE);
+
+        if (result != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        String redName = redPlayerField.getText();
+        String blueName = bluePlayerField.getText();
+
+        game.enableTwoPlayerMode(redName, blueName);
+        game.setGenerationStrategy(new ClickPlacementStrategy());
+
+        LevelConfig config = game.getLevelConfig(level);
+        game.setCurrentLevel(level - 1);
+        game.setGameAreaSize(GAME_AREA_WIDTH, WINDOW_HEIGHT);
+        game.generateRedShapes(config.redShapeCount, GAME_AREA_WIDTH, WINDOW_HEIGHT);
+
+        System.out.println("Strategy: Two Players");
+        System.out.println("Jouer Red: " + game.getRedPlayerName());
+        System.out.println("Jouer Blue: " + game.getBluePlayerName());
+        menuFrame.dispose();
+        startGame(game, new ClickPlacementStrategy());
+    }
+
+    private static void startGame(GameModel game, ShapeGenerationStrategy strategy) {
+        SwingUtilities.invokeLater(() -> {
+            ControleurSouris controller = new ControleurSouris(new EtatSelection(game));
+            JFrame frame = new JFrame("Jeu Rectangle et Cercle " + strategy.getStrategyName());
+            GameView view = new GameView(game, controller, () -> {
+                frame.dispose();
+                showMenu(new GameModel());
+            });
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setContentPane(view);
-            frame.setSize(900, 890);
+            frame.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
         });
-
-        System.out.println("⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅Initialisation data paremeters⋅⋅⋅********************");
-        game.getStatistics();
-        game.generateRedShapes(4, 800, 600);
-
-        Rectangle startupRect = new Rectangle(120, 120, 60, 60, Color.BLUE);
-        Circle startupCircle = new Circle(260, 220, 35, Color.BLUE);
-        executeCommand(CommandType.CREATE, game, startupRect, 0, 0);
-        executeCommand(CommandType.CREATE, game, startupCircle, 0, 0);
-
-        game.getStatistics();
-        System.out.println("⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ TEST ********************");
-        testCommands(game);
     }
 
-    private static void testCommands(GameModel game) {
-        Rectangle blueRect0 = new Rectangle(100, 100, 50, 50, Color.BLUE);
-        Rectangle blueRect1 = new Rectangle(100, 100, 50, 50, Color.BLUE);
-        Circle blueCircle = new Circle(300, 300, 40, Color.BLUE);
-        Circle blueCircle1 = new Circle(300, 300, 40, Color.BLUE);
-
-        executeCommand(CommandType.CREATE, game, blueRect0, 0, 0);
-        boolean canPlace = game.canPlaceBlueShape(blueRect1);
-        System.out.println("Test 1 Same position: " + (canPlace == false));
-
-        executeCommand(CommandType.CREATE, game, blueCircle, 0, 0);
-        boolean canPlace2 = game.canPlaceBlueShape(blueCircle1);
-        System.out.println("Test 1 Same position: " + (canPlace2 == false));
-
-        executeCommand(CommandType.CREATE, game, blueRect1, 0, 0);
-
-        Rectangle rect = new Rectangle(200, 200, 60, 60, Color.BLUE);
-        Command create = executeCommand(CommandType.CREATE, game, rect, 0, 0);
-        System.out.println("Test 2 Creation of blue forms:" + (game.getBlueShapes().size() == 3));
-
-        Command delete = executeCommand(CommandType.DELETE, game, rect, 0, 0);
-        System.out.println("Test 2 Deletion of blue forms:" + (game.getBlueShapes().size() == 3));
-        delete.undo();
-
-        System.out.println("Test 2 Deletion of blue forms: " + (game.getBlueShapes().size() == 3));
-
-        Circle circle = new Circle(150, 150, 30, Color.BLUE);
-        executeCommand(CommandType.CREATE, game, circle, 0, 0);
-        Command move = executeCommand(CommandType.MOVE, game, circle, 500, 500);
-        System.out.println("Test 3 Made move " + (circle.getX() == 500 && circle.getY() == 500));
-        move.undo();
-        System.out.println("Test 3 Made move " + (circle.getX() == 150 && circle.getY() == 150));
-
-        Rectangle rect2 = new Rectangle(400, 400, 50, 50, Color.BLUE);
-        executeCommand(CommandType.CREATE, game, rect2, 0, 0);
-        Command resize = executeCommand(CommandType.RESIZE, game, rect2, 1.5, 1.5);
-        System.out.println("Test 4 Made resize : " + (rect2.width == 75 && rect2.height == 75));
-        resize.undo();
-        System.out.println("Test 4 Made resize :" + (rect2.width == 50 && rect2.height == 50));
-    }
 
     private static Command executeCommand(CommandType type, GameModel game, GameShape shape, double value1, double value2) {
         Command command;
@@ -120,9 +182,8 @@ public class Main {
                 command = new ResizeShapeCommand(game, shape, value1, value2);
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported command type: " + type);
+                throw new IllegalArgumentException("Pas suporter: " + type);
         }
-
         command.execut();
         commandHistory.add(command);
         return command;

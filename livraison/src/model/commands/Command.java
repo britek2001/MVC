@@ -1,4 +1,5 @@
-package model.commands;
+package mvc.model.commands;
+
 public interface Command {
    
    public void execut();

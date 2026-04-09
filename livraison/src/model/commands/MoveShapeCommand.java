@@ -1,7 +1,6 @@
-package model.commands;
-
-import model.games.GameModel;
-import model.shapes.GameShape;
+package mvc.model.commands;
+import mvc.model.game.GameModel;
+import mvc.model.shapes.GameShape;
 
 public class MoveShapeCommand implements Command{
     private GameModel model;

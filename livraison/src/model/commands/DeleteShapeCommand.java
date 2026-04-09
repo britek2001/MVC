@@ -1,7 +1,6 @@
-package model.commands;
-
-import model.games.GameModel;
-import model.shapes.GameShape;
+package mvc.model.commands;
+import mvc.model.game.GameModel;
+import mvc.model.shapes.GameShape;
 
 public class DeleteShapeCommand implements Command{
     private GameModel model;
@@ -32,8 +31,7 @@ public class DeleteShapeCommand implements Command{
         if (!deleted || index < 0 || index > model.getBlueShapes().size()) {
             return;
         }
-        model.getBlueShapes().add(index, shape);
-        model.modelChanged("BLUE_SHAPE_DELETE_UNDO");
+        model.restoreBlueShape(shape, index);
     }
 
     @Override

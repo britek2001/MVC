@@ -1,7 +1,7 @@
-package model.strategy;
+package mvc.model.strategies;
 
 import java.util.List;
-import model.shapes.GameShape;
+import mvc.model.shapes.GameShape;
 public interface ShapeGenerationStrategy {
     List<GameShape> generateShapes(int count, int panelWidth, int panelHeight);
     String getStrategyName();

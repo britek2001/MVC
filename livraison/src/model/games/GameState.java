@@ -1,10 +1,49 @@
-package model.games;
+package mvc.model.game;
 
 public enum GameState {
+
+    // Cycle de jeu
     WAITING_FOR_RED,
     RED_VISIBLE,
     RED_NOT_VISIBLE,    
     PLACING_BLUE,
     LEVEL_COMPLETE,
-    GAME_OVER,
+    GAME_OVER, 
+
+    // Interaction
+    MOVING_SHAPE,
+    RESIZING_SHAPE,
+    MOVE_INVALID_INTERSECTION,
+    MOVE_INVALID_BOUNDS,
+    RESIZE_INVALID_INTERSECTION,
+    RESIZE_INVALID_BOUNDS,
+
+    // Drag & preview
+    DRAG_START,
+    DRAG_UPDATE,
+    DRAG_END,
+
+    // Historique
+    UNDO,
+    REDO,
+
+    // Modifactions des shapes 
+    BLUE_SHAPE_ADDED,
+    BLUE_SHAPE_REMOVED,
+    BLUE_SHAPE_RESTORED,
+    BLUE_SHAPE_MOVED,
+    BLUE_SHAPE_MOVE_UNDO,
+    BLUE_SHAPE_MOVE_REDO,
+    BLUE_SHAPE_RESIZED,
+    BLUE_SHAPE_RESIZE_UNDO,
+    BLUE_SHAPE_RESIZE_REDO,
+    BLUE_LIMIT_REACHED,
+
+    // Mode de Jeux 
+    RED_SHAPES_GENERATED,
+    TWO_PLAYER_ENABLED,
+    TWO_PLAYER_DISABLED,
+    LEVEL_CHANGED,
+    STATE_CHANGED,
+    GAME_STATE_CHANGED
 }

@@ -1,19 +1,25 @@
 package mvc.model.view;
-
+import mvc.model.game.GameModel;
+import mvc.model.game.GameState;
 import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
 public class GameCPanel extends JPanel {
 
+    private final GameModel model;
+
     public GameCPanel(
+            GameModel model,
             Runnable onCreateRectangle,
             Runnable onCreateCircle,
             Runnable onDeleteSelected,
             Runnable onUndo,
-            Runnable onRedo) {
+            Runnable onRedo,
+            Runnable onEndGame) {
         super(new FlowLayout(FlowLayout.CENTER));
-        initialize(onCreateRectangle, onCreateCircle, onDeleteSelected, onUndo, onRedo);
+        this.model = model;
+        initialize(onCreateRectangle, onCreateCircle, onDeleteSelected, onUndo, onRedo, onEndGame);
     }
 
     private void initialize(
@@ -21,25 +27,17 @@ public class GameCPanel extends JPanel {
             Runnable onCreateCircle,
             Runnable onDeleteSelected,
             Runnable onUndo,
-            Runnable onRedo) {
+            Runnable onRedo,
+            Runnable onEndGame) {
 
-        JButton createRectangleButton = new JButton("Rectangle (2 clics)");
+        JButton createRectangleButton = new JButton("Rectangle Click ");
         createRectangleButton.addActionListener(e -> onCreateRectangle.run());
 
-        JButton createCircleButton = new JButton("Circle (2 clics)");
+        JButton createCircleButton = new JButton("Circle Click ");
         createCircleButton.addActionListener(e -> onCreateCircle.run());
 
         JButton eliminateSelectedButton = new JButton("Eliminate Selected Figure");
         eliminateSelectedButton.addActionListener(e -> onDeleteSelected.run());
-
-        JButton deleteButton = new JButton("Delete");
-        deleteButton.addActionListener(e -> onDeleteSelected.run());
-
-        JButton moveButton = new JButton("Move");
-        moveButton.addActionListener(e -> onDeleteSelected.run());
-
-        JButton resizeButton = new JButton("Resize");
-        resizeButton.addActionListener(e -> onDeleteSelected.run());
 
         JButton undoButton = new JButton("Undo");
         undoButton.addActionListener(e -> onUndo.run());
@@ -47,10 +45,16 @@ public class GameCPanel extends JPanel {
         JButton redoButton = new JButton("Redo");
         redoButton.addActionListener(e -> onRedo.run());
 
+        JButton endGameButton = new JButton("Termine Jeux!");
+        endGameButton.addActionListener(e -> {
+            model.setGameState(GameState.GAME_OVER);
+            onEndGame.run();
+        });
+        add(endGameButton);
+
         add(createRectangleButton);
         add(createCircleButton);
         add(eliminateSelectedButton);
-        add(deleteButton);
         add(undoButton);
         add(redoButton);
     }

@@ -51,10 +51,13 @@ public class EtatMoveShape implements EtatInteraction {
 
             boolean intersectsRed = model.getRedShapes().stream()
                 .anyMatch(redShape -> redShape.intersects(selectedShape));
+            boolean intersectsOtherBlue = model.isTwoPlayerMode() && model.getBlueShapes().stream()
+                .anyMatch(blueShape -> blueShape != selectedShape && blueShape.intersects(selectedShape));
+            boolean outOfGameArea = !model.isShapeWithinGameArea(selectedShape);
 
-            if (intersectsRed) {
+            if (intersectsRed || intersectsOtherBlue || outOfGameArea) {
                 selectedShape.setPosition(originalX, originalY);
-                model.modelChanged("MOVE_INVALID_INTERSECTION");
+                model.setState(outOfGameArea ? GameState.MOVE_INVALID_BOUNDS : GameState.MOVE_INVALID_INTERSECTION);
             } else {
                 MoveShapeCommand cmd = new MoveShapeCommand(
                     model, selectedShape, 

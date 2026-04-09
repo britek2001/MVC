@@ -18,6 +18,9 @@ public class EtatCreationRectangle implements EtatInteraction {
 
     @Override
     public void sourisAppuyee(MouseEvent e, ControleurSouris controller) {
+        if (modele.isGameFinished()) {
+            return;
+        }
         if (!isDragging) {
             startX = e.getX();
             startY = e.getY();
@@ -30,6 +33,9 @@ public class EtatCreationRectangle implements EtatInteraction {
 
     @Override
     public void sourisDeplacee(MouseEvent e, ControleurSouris controller) {
+        if (modele.isGameFinished()) {
+            return;
+        }
         if (isDragging) {
             currentX = e.getX();
             currentY = e.getY();
@@ -39,6 +45,9 @@ public class EtatCreationRectangle implements EtatInteraction {
 
     @Override
     public void sourisRelachee(MouseEvent e, ControleurSouris controller) {
+        if (modele.isGameFinished()) {
+            return;
+        }
         if (isDragging) {
             int largeur = Math.abs(currentX - startX);
             int hauteur = Math.abs(currentY - startY);
@@ -57,9 +66,9 @@ public class EtatCreationRectangle implements EtatInteraction {
             Rectangle rect;
             if (strategy instanceof ClickPlacementStrategy) {
                 rect = ((ClickPlacementStrategy) strategy)
-                        .createRectangleFromClicks(startX, startY, currentX, currentY, Color.BLUE);
+                        .createRectangleFromClicks(startX, startY, currentX, currentY, modele.getCurrentDrawingColor());
             } else {
-                rect = new Rectangle(coinX, coinY, largeur, hauteur, Color.BLUE);
+                rect = new Rectangle(coinX, coinY, largeur, hauteur, modele.getCurrentDrawingColor());
             }
             modele.addBlueShape(rect);
 

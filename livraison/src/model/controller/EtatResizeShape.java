@@ -133,7 +133,29 @@ public class EtatResizeShape implements EtatInteraction {
     @Override
     public void sourisRelachee(MouseEvent e, ControleurSouris controller) {
         if (dragging) {
-            if (selectedShape instanceof Rectangle) {
+            boolean intersectsRed = model.getRedShapes().stream()
+                    .anyMatch(redShape -> redShape.intersects(selectedShape));
+            boolean intersectsOtherBlue = model.isTwoPlayerMode() && model.getBlueShapes().stream()
+                    .anyMatch(blueShape -> blueShape != selectedShape && blueShape.intersects(selectedShape));
+            boolean outOfGameArea = !model.isShapeWithinGameArea(selectedShape);
+
+            if (intersectsRed || intersectsOtherBlue || outOfGameArea) {
+                if (selectedShape instanceof Rectangle) {
+                    Rectangle r = (Rectangle) selectedShape;
+                    r.x = originalX;
+                    r.y = originalY;
+                    r.width = originalWidth;
+                    r.height = originalHeight;
+                } else if (selectedShape instanceof Circle) {
+                    Circle c = (Circle) selectedShape;
+                    c.setPosition(originalX, originalY);
+                    double currentRadius = c.getRadius();
+                    if (currentRadius > 0) {
+                        c.resize(originalRadius / currentRadius);
+                    }
+                }
+                model.setState(outOfGameArea ? GameState.RESIZE_INVALID_BOUNDS : GameState.RESIZE_INVALID_INTERSECTION);
+            } else if (selectedShape instanceof Rectangle) {
                 Rectangle r = (Rectangle) selectedShape;
                 double factor = (originalWidth > 0) ? (r.width / originalWidth) : 1.0;
                 ResizeShapeCommand cmd = new ResizeShapeCommand(model, selectedShape, factor, 0);
