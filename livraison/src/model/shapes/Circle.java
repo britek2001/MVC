@@ -58,6 +58,12 @@ public class Circle implements GameShape {
         }
         return 0;  
     }
+    
+    @Override
+    public void setPosition(double newX, double newY) {
+        this.x = newX;
+        this.y = newY;
+    }
 
     @Override
     public boolean contains(Point2D p) {

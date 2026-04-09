@@ -87,6 +87,11 @@ public class Rectangle implements GameShape {
         x += dx;
         y += dy;
     }
+    @Override
+    public void setPosition(double newX, double newY) {
+        this.x = newX;
+        this.y = newY;
+    }
     
     @Override
     public void resize(double factor) {

@@ -48,12 +48,21 @@ public class EtatMoveShape implements EtatInteraction {
     @Override
     public void sourisRelachee(MouseEvent e, ControleurSouris controller) {
         if (dragging && selectedShape != null) {
-            MoveShapeCommand cmd = new MoveShapeCommand(
-                model, selectedShape, 
-                originalX, originalY,
-                selectedShape.getX(), selectedShape.getY()
-            );
-            controller.addCommand(cmd);
+
+            boolean intersectsRed = model.getRedShapes().stream()
+                .anyMatch(redShape -> redShape.intersects(selectedShape));
+
+            if (intersectsRed) {
+                selectedShape.setPosition(originalX, originalY);
+                model.modelChanged("MOVE_INVALID_INTERSECTION");
+            } else {
+                MoveShapeCommand cmd = new MoveShapeCommand(
+                    model, selectedShape, 
+                    originalX, originalY, 
+                    selectedShape.getX(), selectedShape.getY()
+                );
+                controller.addCommand(cmd);
+            }
             dragging = false;
         }
         model.setState(previousState);
