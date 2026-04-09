@@ -7,7 +7,7 @@ public class Circle implements GameShape {
     
     private double x, y, radius;
     private Color color;
-    
+    private static final double CENTRAL_ZONE_RATIO = 0.6;
     public Circle(double x, double y, double radius, Color color) {
         this.x = x;
         this.y = y;
@@ -26,10 +26,8 @@ public class Circle implements GameShape {
     }
 
     public boolean intersects(Rectangle rectangle) {
-        
         double closestX =  Math.max(rectangle.x,  Math.min(this.x,  rectangle.x + rectangle.width));
         double closestY = Math.max(rectangle.y,  Math.min(this.y,  rectangle.y + rectangle.height));
-        
         double distanceX = this.x - closestX;
         double distanceY = this.y - closestY;
         double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
@@ -43,13 +41,30 @@ public class Circle implements GameShape {
         return distance <= (this.radius + other.getRadius());
     }
 
-
     @Override
     public double getArea() {
         return Math.PI * radius * radius;
     }
 
+    public int getZoneType(Point2D p) {
+        if (!contains(p)) {
+            return -1;  
+        }
+        double dx = p.getX() - x;
+        double dy = p.getY() - y;
+        double distance = Math.sqrt(dx * dx + dy * dy);    
+        if (distance <= radius * CENTRAL_ZONE_RATIO) {
+            return 1;  
+        }
+        return 0;  
+    }
     
+    @Override
+    public void setPosition(double newX, double newY) {
+        this.x = newX;
+        this.y = newY;
+    }
+
     @Override
     public boolean contains(Point2D p) {
         return p.distance(x, y) <= radius;

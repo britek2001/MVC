@@ -14,9 +14,10 @@ public class RandomGenerationStrategy implements ShapeGenerationStrategy {
     public List<GameShape> generateShapes(int count, int panelWidth, int panelHeight) {
         List<GameShape> shapes = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            int type = 0;
-            int x = random.nextInt(panelWidth - 100) + 50;
-            int y = random.nextInt(panelHeight - 100) + 50;
+            
+            int type = random.nextInt(2);  
+            int x = 50 + random.nextInt(Math.max(1, panelWidth - 150));
+            int y = 50 + random.nextInt(Math.max(1, panelHeight - 150));
             
             switch (type) {
                 case 0:

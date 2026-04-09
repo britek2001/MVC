@@ -8,7 +8,7 @@ public class Rectangle implements GameShape {
 
     public double x, y, width, height;
     public Color color;
-    
+    private static final double CENTRAL_ZONE_RATIO = 0.6;
     public Rectangle(double x, double y, double width, double height, Color color) {
         this.x = x;
         this.y = y;
@@ -43,6 +43,27 @@ public class Rectangle implements GameShape {
         return distance <= circle.getRadius();
     }
 
+
+    public int getZoneType(Point2D p) {
+       
+        if (!contains(p)) {
+            return -1;  
+        }
+        
+        double centralWidth = width * CENTRAL_ZONE_RATIO;
+        double centralHeight = height * CENTRAL_ZONE_RATIO;
+        double centralX = x + (width - centralWidth) / 2;
+        double centralY = y + (height - centralHeight) / 2;
+        
+        if (p.getX() >= centralX && p.getX() <= centralX + centralWidth &&
+            p.getY() >= centralY && p.getY() <= centralY + centralHeight) {
+            return 1;  
+        }
+
+        return 0;  
+    }
+
+
     public boolean intersects(Rectangle rectangle) {
         return this.x < rectangle.x + rectangle.width &&
                this.x + this.width > rectangle.x &&
@@ -65,6 +86,11 @@ public class Rectangle implements GameShape {
     public void move(double dx, double dy) {
         x += dx;
         y += dy;
+    }
+    @Override
+    public void setPosition(double newX, double newY) {
+        this.x = newX;
+        this.y = newY;
     }
     
     @Override

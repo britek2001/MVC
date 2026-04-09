@@ -32,9 +32,11 @@ public class Main {
         Player player2 = new Player("Taiwen");
         GameModel game = new GameModel();
 
+        // ShapeGenerationStrategy strategy = new ClickPlacementStrategy();
         ShapeGenerationStrategy strategy = new RandomGenerationStrategy();
         System.out.println("The used Strategy " + strategy.getStrategyName());
         game.setGenerationStrategy(strategy);
+        ControleurSouris controleurSouris = new ControleurSouris(new EtatSelection(game));
 
         SwingUtilities.invokeLater(() -> {
             GameView view = new GameView(game, null);
@@ -56,7 +58,6 @@ public class Main {
         executeCommand(CommandType.CREATE, game, startupCircle, 0, 0);
 
         game.getStatistics();
-
         System.out.println("⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅ TEST ********************");
         testCommands(game);
     }
@@ -113,7 +114,7 @@ public class Main {
                 command = new DeleteShapeCommand(game, shape);
                 break;
             case MOVE:
-                command = new MoveShapeCommand(game, shape, value1, value2);
+                command = new MoveShapeCommand(game, shape, shape.getX(), shape.getY(), value1, value2);
                 break;
             case RESIZE:
                 command = new ResizeShapeCommand(game, shape, value1, value2);

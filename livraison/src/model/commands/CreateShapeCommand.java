@@ -18,9 +18,16 @@ public class CreateShapeCommand implements Command{
 
     @Override
     public void execut(){
-        model.addBlueShape(shape);
-        index = model.getBlueShapes().indexOf(shape);
-        created = index != -1;
+        boolean added = model.addBlueShape(shape);
+        if(added){
+                System.out.println("Shape added successfully.");
+                index = model.getBlueShapes().indexOf(shape);
+                System.out.println("Index of created shape: " + index); 
+                created = index != -1;
+            } else {
+                System.out.println("Failed to add shape. It may intersect with existing shapes or exceed the limit.");
+                return; 
+        }   
     }
     
     @Override
