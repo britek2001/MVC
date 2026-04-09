@@ -14,7 +14,6 @@ import java.util.Random;
 import mvc.model.commands.CreateShapeCommand;
 import mvc.model.commands.DeleteShapeCommand;
 import mvc.model.controller.ControleurSouris;
-import mvc.model.controller.EtatCreationRectangle;
 import mvc.model.controller.EtatCreationCercle;
 import mvc.model.game.GameModel;
 import mvc.model.shapes.GameShape;
@@ -33,8 +32,14 @@ public class GameView extends JPanel implements Observer {
 
     public GameView(GameModel model, MouseAdapter controller) {
         this.model = model;
-        this.controller = controller;
+        this.mouseController = controller;
+
+        this.undoStack = new ArrayDeque<Command>();
+        this.redoStack = new ArrayDeque<Command>();
+        this.infoLabel = new JLabel();
+
         this.model.addObserver(this);
+
         setBackground(Color.WHITE);
         setLayout(new BorderLayout());
         initializeControls();
@@ -63,6 +68,7 @@ public class GameView extends JPanel implements Observer {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
         Graphics2D g2 = (Graphics2D) g;
         painter.paint(g2, model, selectedShape, controller);
     }
@@ -107,14 +113,38 @@ public class GameView extends JPanel implements Observer {
         repaint();
     }
 
-    private void deleteSelectedShape() {
-        GameShape shape = getTargetShape();
-        if (shape == null) {
+    private void updateInfoLabel() {
+        String selectedText = "none";
+
+        if (selectedShape != null) {
+            selectedText = selectedShape.getClass().getSimpleName();
+        }
+
+        infoLabel.setText(
+            "État: " + model.getState()
+            + " | Score: " + model.getTotalScore()
+            + " | Bleues: " + model.getBlueShapes().size()
+            + " | Rouges: " + model.getRedShapes().size()
+            + " | Nivel: " + model.getLevel()
+            + " | Selected: " + selectedText
+        );
+    }
+
+    private void executeCommand(Command command) {
+        command.execut();
+        undoStack.push(command);
+        redoStack.clear();
+        updateInfoLabel();
+    }
+
+    private void deleteCurrentShape() {
+        if (selectedShape == null) {
             return;
         }
 
         historyManager.executeAndStore(new DeleteShapeCommand(model, shape));
         selectedShape = null;
+        updateInfoLabel();
         repaint();
     }
 
@@ -132,6 +162,7 @@ public class GameView extends JPanel implements Observer {
             return;
         }
         model.modelChanged("UNDO");
+        updateInfoLabel();
         repaint();
     }
 
@@ -149,6 +180,7 @@ public class GameView extends JPanel implements Observer {
             return;
         }
         model.modelChanged("REDO");
+        updateInfoLabel();
         repaint();
     }
 
@@ -178,13 +210,14 @@ public class GameView extends JPanel implements Observer {
     public void createRectangle(Rectangle rect) {
         historyManager.executeAndStore(new CreateShapeCommand(model, rect));
         selectedShape = rect;
+        updateInfoLabel();
         repaint();
     }
 
     public void createCircle(Circle circle) {
         historyManager.executeAndStore(new CreateShapeCommand(model, circle));
         selectedShape = circle;
+        updateInfoLabel();
         repaint();
     }
-
 }
