@@ -1,4 +1,0 @@
-# Compiler
-javac livraison/src/Main.java
-# Execute 
-java -cp livraison/src Main
