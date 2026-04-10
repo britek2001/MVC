@@ -40,7 +40,6 @@ class GameModelTest {
     @Test
     @DisplayName("testAddBlueShapeWhenGameFinished")
     void testAddBlueShapeWhenGameFinished() {
-        // Force game to be finished
         for (int i = 0; i < 4; i++) {
             model.addBlueShape(new Circle(50 + i*50, 50, 20, Color.BLUE));
         }
@@ -101,7 +100,6 @@ class GameModelTest {
         assertEquals(counterBefore - 1, model.getBlueShapesPlacedThisLevel());
     }
 
-    // ========== TESTS FIND SHAPE ==========
 
     @Test
     @DisplayName("testFindBlueShapeAt")
@@ -124,7 +122,6 @@ class GameModelTest {
         assertNull(found);
     }
 
-    // ========== TESTS COLLISION DETECTION ==========
 
     @Test
     @DisplayName("testCanPlaceBlueShapeIntersection")
@@ -148,13 +145,12 @@ class GameModelTest {
         assertTrue(canPlace);
     }
 
-    // ========== TESTS SCORE CALCULATION ==========
 
     @Test
     @DisplayName("testCalculateScore")
     void testCalculateScore() {
-        model.addBlueShape(testCircle);  // Circle area = π * 20² ≈ 1256.64
-        model.addBlueShape(testRectangle); // Rectangle area = 50 * 40 = 2000
+        model.addBlueShape(testCircle);  
+        model.addBlueShape(testRectangle); 
         
         int score = model.calculateScore();
         
@@ -162,7 +158,6 @@ class GameModelTest {
         assertEquals(expectedScore, score);
     }
 
-    // ========== TESTS GAME AREA BOUNDS ==========
 
     @Test
     @DisplayName("testIsPointInsideGameArea")
@@ -184,7 +179,6 @@ class GameModelTest {
         assertFalse(model.isShapeWithinGameArea(outsideCircle));
     }
 
-    // ========== TESTS GAME STATE ==========
 
     @Test
     @DisplayName("testSetGameState")
@@ -196,7 +190,6 @@ class GameModelTest {
         assertEquals(GameState.GAME_OVER, model.getState());
     }
 
-    // ========== TESTS TWO PLAYER MODE ==========
 
     @Test
     @DisplayName("testEnableTwoPlayerMode")
@@ -215,8 +208,6 @@ class GameModelTest {
         model.enableTwoPlayerMode("Red", "Blue");
         
         assertEquals(Color.RED, model.getCurrentDrawingColor());
-        
-        // Complete a turn to switch players (needs shapes placed)
-        // This is simplified - full test would need to place shapes
+
     }
 }

@@ -76,16 +76,11 @@ class ShapeTest {
     @Test
     @DisplayName("testRectangleZoneType")
     void testRectangleZoneType() {
-        // Zone 1 (center): 60% of dimensions
-        double centerX = 150 + 30; // x + width/2 = 180
-        double centerY = 150 + 25; // y + height/2 = 175
+        double centerX = 150 + 30; 
+        double centerY = 150 + 25; 
         
         assertTrue(rectangle.getZoneType(new Point2D.Double(centerX, centerY)) == 1);
-        
-        // Near corner (edge zone)
         assertTrue(rectangle.getZoneType(new Point2D.Double(155, 155)) == 0);
-        
-        // Outside
         assertTrue(rectangle.getZoneType(new Point2D.Double(100, 100)) == -1);
     }
 
@@ -147,7 +142,6 @@ class ShapeTest {
         assertEquals(circle.getRadius(), clonedCircle.getRadius());
         assertEquals(circle.getColor(), clonedCircle.getColor());
         
-        // Modify clone should not affect original
         clonedCircle.move(50, 50);
         assertNotEquals(circle.getX(), clonedCircle.getX());
     }
