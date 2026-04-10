@@ -163,6 +163,7 @@ public class GameModel extends Observable {
         }
 
         redShapes.addAll(newRedShapes);
+        clampShapesToGameArea(redShapes);
         System.out.println("Generer " + redShapes.size() + " red shapes");
         modelChanged("RED_SHAPES_GENERATED");
 
@@ -452,6 +453,38 @@ public class GameModel extends Observable {
     public void setGameAreaSize(int newWidth, int newHeight) {
         width = Math.max(1, newWidth);
         height = Math.max(1, newHeight);
+        clampShapesToGameArea(redShapes);
+        clampShapesToGameArea(blueShapes);
+    }
+
+    private void clampShapesToGameArea(List<GameShape> shapes) {
+        for (GameShape shape : shapes) {
+            keepShapeInsideGameArea(shape);
+        }
+    }
+
+    private void keepShapeInsideGameArea(GameShape shape) {
+        if (shape instanceof Rectangle) {
+            Rectangle r = (Rectangle) shape;
+            r.width = Math.max(1, Math.min(r.width, width));
+            r.height = Math.max(1, Math.min(r.height, height));
+            double clampedX = Math.max(0, Math.min(r.x, width - r.width));
+            double clampedY = Math.max(0, Math.min(r.y, height - r.height));
+            r.setPosition(clampedX, clampedY);
+            return;
+        }
+
+        if (shape instanceof Circle) {
+            Circle c = (Circle) shape;
+            double maxRadius = Math.max(1, Math.min(width, height) / 2.0);
+            if (c.getRadius() > maxRadius) {
+                c.resize(maxRadius / c.getRadius());
+            }
+            double radius = c.getRadius();
+            double clampedX = Math.max(radius, Math.min(c.getX(), width - radius));
+            double clampedY = Math.max(radius, Math.min(c.getY(), height - radius));
+            c.setPosition(clampedX, clampedY);
+        }
     }
 
     public boolean isPointInsideGameArea(double x, double y) {
