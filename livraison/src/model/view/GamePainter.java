@@ -115,9 +115,12 @@ public class GamePainter {
     }
 
     private void drawHud(Graphics2D g2, GameModel model, GameState state, int gameWidth) {
-        double remainingSeconds = model.getRemainingRedTime() / 1000.0;
-        double limitMillis = Math.max(model.getCurrentRedTimeLimitMillis(), 1L);
-        double ratio = Math.max(0.0, Math.min(1.0, model.getRemainingRedTime() / limitMillis));
+        double remainingLevelSeconds = model.getRemainingRedTime() / 1000.0;
+        double levelLimitMillis = Math.max(model.getCurrentRedTimeLimitMillis(), 1L);
+        double levelRatio = Math.max(0.0, Math.min(1.0, model.getRemainingRedTime() / levelLimitMillis));
+        double remainingGameSeconds = model.getRemainingGameTime() / 1000.0;
+        double gameLimitMillis = Math.max(model.getCurrentGameTimeLimitMillis(), 1L);
+        double gameRatio = Math.max(0.0, Math.min(1.0, model.getRemainingGameTime() / gameLimitMillis));
         int infoX = gameWidth + 16;
         g2.setColor(Color.BLACK);
         g2.drawString("INFORMATIONS", infoX, 24);
@@ -126,27 +129,36 @@ public class GamePainter {
         g2.drawString("Compteur: " + model.getBlueShapesPlacedThisLevel() + "/" + model.getBlueShapesPerLevel(), infoX, 100);
         g2.drawString("Rouges: " + model.getRedShapes().size(), infoX, 124);
         g2.drawString("Niveau: " + model.getLevel(), infoX, 148);
-        g2.drawString("Temps restant: " + String.format("%.1f", remainingSeconds) + " s", infoX, 172);
+        g2.drawString("Temps partie (60s): " + String.format("%.1f", remainingGameSeconds) + " s", infoX, 172);
         g2.drawString("Objectif: " + model.getBlueShapesPerLevel() + " formes", infoX, 196);
         g2.drawString("Restantes: " + model.getBlueShapesRemainingForLevel(), infoX, 220);
+        g2.drawString("Temps niveau: " + String.format("%.1f", remainingLevelSeconds) + " s", infoX, 244);
 
         int barX = infoX;
-        int barY = 236;
+        int barY = 260;
         int barWidth = 200;
         int barHeight = 18;
         g2.setColor(new Color(203, 213, 225));
         g2.fillRoundRect(barX, barY, barWidth, barHeight, 10, 10);
-        g2.setColor(getCountdownColor(ratio));
-        g2.fillRoundRect(barX, barY, (int) Math.round(barWidth * ratio), barHeight, 10, 10);
+        g2.setColor(getCountdownColor(gameRatio));
+        g2.fillRoundRect(barX, barY, (int) Math.round(barWidth * gameRatio), barHeight, 10, 10);
         g2.setColor(new Color(148, 163, 184));
         g2.drawRoundRect(barX, barY, barWidth, barHeight, 10, 10);
 
+        int levelBarY = barY + 26;
+        g2.setColor(new Color(203, 213, 225));
+        g2.fillRoundRect(barX, levelBarY, barWidth, barHeight, 10, 10);
+        g2.setColor(getCountdownColor(levelRatio));
+        g2.fillRoundRect(barX, levelBarY, (int) Math.round(barWidth * levelRatio), barHeight, 10, 10);
+        g2.setColor(new Color(148, 163, 184));
+        g2.drawRoundRect(barX, levelBarY, barWidth, barHeight, 10, 10);
+
         if (model.isTwoPlayerMode()) {
-            g2.drawString("Mode: 2 joueurs", infoX, 272);
-            g2.drawString("Tour: " + model.getCurrentPlayerName() + " [" + model.getCurrentPlayerColorLabel() + "]", infoX, 296);
-            g2.drawString("Tours: " + model.getTurnsPlayed() + "/" + (model.getMaxTurnsPerPlayer() * 2), infoX, 320);
-            g2.drawString(model.getRedPlayerName() + " score: " + model.getRedPlayerScore(), infoX, 344);
-            g2.drawString(model.getBluePlayerName() + " score: " + model.getBluePlayerScore(), infoX, 368);
+            g2.drawString("Mode: 2 joueurs", infoX, 322);
+            g2.drawString("Tour: " + model.getCurrentPlayerName() + " [" + model.getCurrentPlayerColorLabel() + "]", infoX, 346);
+            g2.drawString("Tours: " + model.getTurnsPlayed() + "/" + (model.getMaxTurnsPerPlayer() * 2), infoX, 370);
+            g2.drawString(model.getRedPlayerName() + " score: " + model.getRedPlayerScore(), infoX, 394);
+            g2.drawString(model.getBluePlayerName() + " score: " + model.getBluePlayerScore(), infoX, 418);
         }
     }
 

@@ -41,7 +41,7 @@ public class EtatMoveShape implements EtatInteraction {
             selectedShape.move(deltaX, deltaY);
             startX = e.getX();
             startY = e.getY();
-            controller.repaintView();
+            model.modelChanged("SHAPE_MOVING");
         }
     }
     

@@ -66,5 +66,5 @@ public class ControleurSouris extends MouseAdapter {
         return true;
     }
 
-    public void repaintView() { }
+
 }

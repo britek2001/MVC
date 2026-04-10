@@ -20,6 +20,7 @@ mvc/model/controller/EtatCreationRectangle.class
 mvc/model/view/GameCPanel.class
 mvc/model/commands/DeleteShapeCommand.class
 mvc/model/game/Player.class
+mvc/model/game/GameModel$2.class
 mvc/model/game/GameState.class
 mvc/model/controller/EtatCreationCercle.class
 mvc/model/game/GameModel$1.class

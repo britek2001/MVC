@@ -133,9 +133,9 @@ class ShapeTest {
     }
 
     @Test
-    @DisplayName("testShapeClone")
-    void testShapeClone() {
-        Circle clonedCircle = (Circle) circle.clone();
+    @DisplayName("testShapeCopy")
+    void testShapeCopy() {
+        Circle clonedCircle = (Circle) circle.copy();
         
         assertEquals(circle.getX(), clonedCircle.getX());
         assertEquals(circle.getY(), clonedCircle.getY());

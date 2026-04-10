@@ -15,6 +15,10 @@ public class Circle implements GameShape {
         this.color = color;
     }
 
+    public Circle(Circle other) {
+        this(other.x, other.y, other.radius, other.color);
+    }
+
     @Override
     public boolean intersects(GameShape other) {
         if (other instanceof Rectangle) {
@@ -98,8 +102,8 @@ public class Circle implements GameShape {
     public void setColor(Color color) { this.color = color; }
     
     @Override
-    public GameShape clone() {
-        return new Circle(x, y, radius, color);
+    public GameShape copy() {
+        return new Circle(this);
     }
     public double getRadius() {
         return radius;

@@ -19,6 +19,7 @@ import java.util.Map;
 public class GameModel extends Observable {
 
     private static final int BLUE_SHAPES_PER_LEVEL = 4;
+    private static final long TOTAL_GAME_DURATION_MILLIS = 60_000L;
     private boolean redShapesVisible = true;
     private final Timer timer = new Timer(true); 
     private List<GameShape> redShapes;
@@ -42,6 +43,9 @@ public class GameModel extends Observable {
     private boolean magistralWin;
     private int finalCoveredArea;
     private long currentRedTimeLimitMillis;
+    private long gameEndsAtMillis;
+    private long currentGameTimeLimitMillis;
+    private boolean globalTimerStarted;
     
     private static final int MAX_LEVEL = 5;
     private static final int MAX_TURNS_PER_PLAYER = 4;
@@ -68,6 +72,9 @@ public class GameModel extends Observable {
         magistralWin = false;
         finalCoveredArea = 0;
         currentRedTimeLimitMillis = 0;
+        gameEndsAtMillis = 0;
+        currentGameTimeLimitMillis = TOTAL_GAME_DURATION_MILLIS;
+        globalTimerStarted = false;
     }
 
     public boolean areRedShapesVisible() {
@@ -84,11 +91,6 @@ public class GameModel extends Observable {
         }
 
         redShapesVisible = false;
-        if (!twoPlayerMode && getBlueShapesPlacedThisLevel() < BLUE_SHAPES_PER_LEVEL) {
-            finishGame(false);
-            return;
-        }
-
         state = GameState.PLACING_BLUE;
         modelChanged("RED_NOT_VISIBLE"); 
     }
@@ -140,6 +142,7 @@ public class GameModel extends Observable {
         int levelToGenerate = Math.min(currentLevel + 1, MAX_LEVEL);
         LevelConfig cfg = getLevelConfig(levelToGenerate);
         count = Math.min(count, cfg.redShapeCount);
+        startGlobalGameTimerIfNeeded();
 
         System.out.println("Level: " + levelToGenerate + ", Red shapes pour generer: " + count);
 
@@ -236,7 +239,13 @@ public class GameModel extends Observable {
                     completeTwoPlayerTurn();
                     modelChanged("LEVEL_COMPLETE");
                 } else {
-                    finishGame(true);
+                    if (!globalTimerStarted || generationStrategy == null) {
+                        finishGame(true);
+                    } else {
+                        int nextLevel = Math.min(currentLevel + 1, MAX_LEVEL);
+                        LevelConfig cfg = getLevelConfig(nextLevel);
+                        generateRedShapes(cfg.redShapeCount, width, height);
+                    }
                 }
             }
             System.out.println("Score Actuel: " + totalScore);
@@ -297,11 +306,25 @@ public class GameModel extends Observable {
         redShapes.clear();
         blueShapes.clear();
         blueShapesPlacedThisLevel = 0;
+        gameFinished = false;
+        gameWon = false;
+        magistralWin = false;
+        finalCoveredArea = 0;
+        gameEndsAtMillis = 0;
+        currentGameTimeLimitMillis = TOTAL_GAME_DURATION_MILLIS;
+        globalTimerStarted = false;
         modelChanged("TWO_PLAYER_ENABLED");
     }
 
     public void disableTwoPlayerMode() {
         twoPlayerMode = false;
+        gameFinished = false;
+        gameWon = false;
+        magistralWin = false;
+        finalCoveredArea = 0;
+        gameEndsAtMillis = 0;
+        currentGameTimeLimitMillis = TOTAL_GAME_DURATION_MILLIS;
+        globalTimerStarted = false;
         modelChanged("TWO_PLAYER_DISABLED");
     }
 
@@ -436,6 +459,37 @@ public class GameModel extends Observable {
 
     public long getCurrentRedTimeLimitMillis() {
         return currentRedTimeLimitMillis;
+    }
+
+    public long getRemainingGameTime() {
+        if (!globalTimerStarted || gameEndsAtMillis <= 0) {
+            return currentGameTimeLimitMillis;
+        }
+        long remainingTime = gameEndsAtMillis - System.currentTimeMillis();
+        return Math.max(remainingTime, 0);
+    }
+
+    public long getCurrentGameTimeLimitMillis() {
+        return currentGameTimeLimitMillis;
+    }
+
+    private void startGlobalGameTimerIfNeeded() {
+        if (globalTimerStarted || gameFinished) {
+            return;
+        }
+
+        globalTimerStarted = true;
+        currentGameTimeLimitMillis = TOTAL_GAME_DURATION_MILLIS;
+        gameEndsAtMillis = System.currentTimeMillis() + TOTAL_GAME_DURATION_MILLIS;
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (!gameFinished) {
+                    finishGame(false);
+                }
+            }
+        }, TOTAL_GAME_DURATION_MILLIS);
     }
 
     private List<GameShape> generateValidRedShapes(int count, int panelWidth, int panelHeight) {

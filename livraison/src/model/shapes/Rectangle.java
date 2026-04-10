@@ -16,6 +16,10 @@ public class Rectangle implements GameShape {
         this.height = height;
         this.color = color;
     }
+
+    public Rectangle(Rectangle other) {
+        this(other.x, other.y, other.width, other.height, other.color);
+    }
     
 
     @Override
@@ -106,8 +110,8 @@ public class Rectangle implements GameShape {
     public void setColor(Color color) { this.color = color; }
     
     @Override
-    public GameShape clone() {
-        return new Rectangle(x, y, width, height, color);
+    public GameShape copy() {
+        return new Rectangle(this);
     }
 
     

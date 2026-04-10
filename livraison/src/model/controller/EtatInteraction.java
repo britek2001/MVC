@@ -6,5 +6,5 @@ public interface EtatInteraction {
     void sourisAppuyee(MouseEvent e, ControleurSouris controller);
     void sourisDeplacee(MouseEvent e, ControleurSouris controller);
     void sourisRelachee(MouseEvent e, ControleurSouris controller);
-    void sourisBougee(MouseEvent e, ControleurSouris controller);
+    default void sourisBougee(MouseEvent e, ControleurSouris controller) {}
 }

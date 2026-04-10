@@ -42,7 +42,7 @@ public class Main {
     private static void showMenu(GameModel game) {
         SwingUtilities.invokeLater(() -> {
             JFrame menuFrame = new JFrame("ASI GAME");
-            menuFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            menuFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             menuFrame.setSize(400, 300);
             menuFrame.setLocationRelativeTo(null);
 
@@ -157,7 +157,7 @@ public class Main {
                 frame.dispose();
                 showMenu(new GameModel());
             });
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             frame.setContentPane(view);
             frame.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
             frame.setLocationRelativeTo(null);

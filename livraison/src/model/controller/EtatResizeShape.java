@@ -113,7 +113,7 @@ public class EtatResizeShape implements EtatInteraction {
                     r.y = newY;
                     r.width = newWidth;
                     r.height = newHeight;
-                    controller.repaintView();
+                    model.modelChanged("SHAPE_RESIZING");
                 }
             } else if (selectedShape instanceof Circle) {
                 Circle c = (Circle) selectedShape;
@@ -123,7 +123,7 @@ public class EtatResizeShape implements EtatInteraction {
                     double currentRadius = c.getRadius();
                     if (currentRadius > 0) {
                         c.resize(newRadius / currentRadius);
-                        controller.repaintView();
+                        model.modelChanged("SHAPE_RESIZING");
                     }
                 }
             }
@@ -172,6 +172,5 @@ public class EtatResizeShape implements EtatInteraction {
         controller.changerEtat(new EtatSelection(model));
     }
     
-    @Override
-    public void sourisBougee(MouseEvent e, ControleurSouris controller) {}
+
 }

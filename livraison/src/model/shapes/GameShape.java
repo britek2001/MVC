@@ -14,6 +14,6 @@ public interface GameShape extends Serializable {
     void resize(double factor);
     Color getColor();
     void setColor(Color color);
-    GameShape clone();
+    GameShape copy();
     void setPosition(double newX, double newY);
 }

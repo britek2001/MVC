@@ -65,7 +65,7 @@ public class TwoPlayerStrategy implements ShapeGenerationStrategy {
     private List<GameShape> cloneShapes(List<GameShape> originals) {
         List<GameShape> clones = new ArrayList<>();
         for (GameShape shape : originals) {
-            clones.add(shape.clone());
+            clones.add(shape.copy());
         }
         return clones;
     }
