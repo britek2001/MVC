@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
 import java.awt.Color;
-import java.awt.geom.Point2D;
-import java.util.List;
 
 import mvc.model.commands.*;
 import mvc.model.shapes.*;
@@ -76,7 +74,6 @@ class GameModelTest {
         assertEquals(0, model.getBlueShapes().size());
     }
 
-
     @Test
     @DisplayName("testRemoveBlueShape")
     void testRemoveBlueShape() {
@@ -100,7 +97,6 @@ class GameModelTest {
         assertEquals(counterBefore - 1, model.getBlueShapesPlacedThisLevel());
     }
 
-
     @Test
     @DisplayName("testFindBlueShapeAt")
     void testFindBlueShapeAt() {
@@ -121,7 +117,6 @@ class GameModelTest {
         
         assertNull(found);
     }
-
 
     @Test
     @DisplayName("testCanPlaceBlueShapeIntersection")
@@ -145,7 +140,6 @@ class GameModelTest {
         assertTrue(canPlace);
     }
 
-
     @Test
     @DisplayName("testCalculateScore")
     void testCalculateScore() {
@@ -157,7 +151,6 @@ class GameModelTest {
         int expectedScore = (int)(Math.PI * 20 * 20) + 2000;
         assertEquals(expectedScore, score);
     }
-
 
     @Test
     @DisplayName("testIsPointInsideGameArea")
@@ -179,7 +172,6 @@ class GameModelTest {
         assertFalse(model.isShapeWithinGameArea(outsideCircle));
     }
 
-
     @Test
     @DisplayName("testSetGameState")
     void testSetGameState() {
@@ -189,7 +181,6 @@ class GameModelTest {
         model.setState(GameState.GAME_OVER);
         assertEquals(GameState.GAME_OVER, model.getState());
     }
-
 
     @Test
     @DisplayName("testEnableTwoPlayerMode")
@@ -208,6 +199,211 @@ class GameModelTest {
         model.enableTwoPlayerMode("Red", "Blue");
         
         assertEquals(Color.RED, model.getCurrentDrawingColor());
+    }
 
+    @Test
+    @DisplayName("testNextLevelIncrementsLevel")
+    void testNextLevelIncrementsLevel() {
+        int initialLevel = model.getLevel();
+        model.nextLevel();
+        assertEquals(initialLevel + 1, model.getLevel());
+    }
+
+    @Test
+    @DisplayName("testCantPlaceMoreThan4BlueShapesPerLevel")
+    void testCantPlaceMoreThan4BlueShapesPerLevel() {
+        for (int i = 0; i < 4; i++) {
+            Circle circle = new Circle(100 + i * 50, 100, 20, Color.BLUE);
+            assertTrue(model.addBlueShape(circle));
+        }
+        
+        Circle fifthCircle = new Circle(400, 100, 20, Color.BLUE);
+        boolean added = model.addBlueShape(fifthCircle);
+        
+        assertFalse(added);
+        assertEquals(4, model.getBlueShapes().size());
+    }
+
+    @Test
+    @DisplayName("testGetBlueShapesRemainingForLevel")
+    void testGetBlueShapesRemainingForLevel() {
+        assertEquals(4, model.getBlueShapesRemainingForLevel());
+        
+        model.addBlueShape(testCircle);
+        assertEquals(3, model.getBlueShapesRemainingForLevel());
+        
+        model.addBlueShape(testRectangle);
+        assertEquals(2, model.getBlueShapesRemainingForLevel());
+    }
+
+    @Test
+    @DisplayName("testAreRedShapesVisibleInitially")
+    void testAreRedShapesVisibleInitially() {
+        assertTrue(model.areRedShapesVisible());
+    }
+
+    @Test
+    @DisplayName("testHideRedShapes")
+    void testHideRedShapes() {
+        model.hideRedShapes();
+        assertFalse(model.areRedShapesVisible());
+    }
+
+    @Test
+    @DisplayName("testShowRedShapes")
+    void testShowRedShapes() {
+        model.hideRedShapes();
+        assertFalse(model.areRedShapesVisible());
+        
+        model.showRedShapes();
+        assertTrue(model.areRedShapesVisible());
+    }
+
+    @Test
+    @DisplayName("testGetRemainingRedTime")
+    void testGetRemainingRedTime() {
+        model.setGenerationStrategy(new RandomGenerationStrategy());
+        model.generateRedShapes(2, 800, 600);
+        
+        long remaining = model.getRemainingRedTime();
+        assertTrue(remaining >= 0);
+        assertTrue(remaining <= 10000); 
+    }
+
+    @Test
+    @DisplayName("testRemoveNonExistentShape")
+    void testRemoveNonExistentShape() {
+        Circle nonExistentCircle = new Circle(999, 999, 10, Color.BLUE);
+        int sizeBefore = model.getBlueShapes().size();
+        
+        model.removeBlueShape(nonExistentCircle);
+        
+        assertEquals(sizeBefore, model.getBlueShapes().size());
+    }
+
+    @Test
+    @DisplayName("testRestoreBlueShapeWithInvalidIndex")
+    void testRestoreBlueShapeWithInvalidIndex() {
+        model.addBlueShape(testCircle);
+        int sizeBefore = model.getBlueShapes().size();
+        
+        model.restoreBlueShape(testRectangle, 999);
+        assertEquals(sizeBefore + 1, model.getBlueShapes().size());
+        
+        model.restoreBlueShape(new Circle(300, 300, 20, Color.BLUE), -1);
+        assertEquals(sizeBefore + 2, model.getBlueShapes().size());
+    }
+
+    @Test
+    @DisplayName("testPlaceShapeExactlyOnGameAreaBorder")
+    void testPlaceShapeExactlyOnGameAreaBorder() {
+        Rectangle borderRect = new Rectangle(0, 100, 50, 50, Color.BLUE);
+        assertTrue(model.canPlaceBlueShape(borderRect));
+        
+        Rectangle borderRightRect = new Rectangle(750, 100, 50, 50, Color.BLUE);
+        assertTrue(model.canPlaceBlueShape(borderRightRect));
+        
+        Circle borderCircle = new Circle(20, 100, 20, Color.BLUE);
+        assertTrue(model.canPlaceBlueShape(borderCircle));
+    }
+
+    @Test
+    @DisplayName("testPlaceShapeExactlyOnBorderEdge")
+    void testPlaceShapeExactlyOnBorderEdge() {
+        Rectangle exactRect = new Rectangle(800, 0, 0, 0, Color.BLUE);
+        assertFalse(model.canPlaceBlueShape(exactRect));
+    }
+
+    @Test
+    @DisplayName("testGetLevelConfig")
+    void testGetLevelConfig() {
+        LevelConfig config1 = model.getLevelConfig(1);
+        assertEquals(2, config1.redShapeCount);
+        assertEquals(10, config1.timeSeconds);
+        assertEquals("Facile", config1.difficulty);
+        
+        LevelConfig config3 = model.getLevelConfig(3);
+        assertEquals(4, config3.redShapeCount);
+        assertEquals(8, config3.timeSeconds);
+        assertEquals("Difficile", config3.difficulty);
+        
+        LevelConfig config5 = model.getLevelConfig(5);
+        assertEquals(6, config5.redShapeCount);
+        assertEquals(6, config5.timeSeconds);
+        assertEquals("Extreme", config5.difficulty);
+    }
+
+    @Test
+    @DisplayName("testGetLevelConfigWithInvalidLevel")
+    void testGetLevelConfigWithInvalidLevel() {
+        LevelConfig defaultConfig = model.getLevelConfig(99);
+        assertNotNull(defaultConfig);
+        assertEquals(2, defaultConfig.redShapeCount);
+    }
+
+    @Test
+    @DisplayName("testIsGameFinished")
+    void testIsGameFinished() {
+        assertFalse(model.isGameFinished());
+        
+        for (int i = 0; i < 4; i++) {
+            model.addBlueShape(new Circle(100 + i * 50, 100, 20, Color.BLUE));
+        }
+        
+        assertTrue(model.isGameFinished());
+    }
+
+    @Test
+    @DisplayName("testGetFinalCoveredArea")
+    void testGetFinalCoveredArea() {
+        model.addBlueShape(testCircle);
+        model.addBlueShape(testRectangle);
+        
+        for (int i = 2; i < 4; i++) {
+            model.addBlueShape(new Circle(100 + i * 50, 100, 20, Color.BLUE));
+        }
+
+        int expectedArea = (int) (3 * (Math.PI * 20 * 20) + 2000);
+        assertEquals(expectedArea, model.getFinalCoveredArea());
+    }
+
+    @Test
+    @DisplayName("testGetStatistics")
+    void testGetStatistics() {
+        model.addBlueShape(testCircle);
+        model.addBlueShape(testRectangle);
+        assertDoesNotThrow(() -> model.getStatistics());
+    }
+
+    @Test
+    @DisplayName("testSetGameAreaSize")
+    void testSetGameAreaSize() {
+        model.setGameAreaSize(1024, 768);
+        assertEquals(1024, model.getGameWidth());
+        assertEquals(768, model.getGameHeight());
+    }
+
+    @Test
+    @DisplayName("testSetGameAreaSizeWithInvalidValues")
+    void testSetGameAreaSizeWithInvalidValues() {
+        model.setGameAreaSize(-100, -200);
+        assertEquals(1, model.getGameWidth());
+        assertEquals(1, model.getGameHeight());
+    }
+
+    @Test
+    @DisplayName("testGetCurrentDrawingColorInSoloMode")
+    void testGetCurrentDrawingColorInSoloMode() {
+        assertEquals(Color.BLUE, model.getCurrentDrawingColor());
+    }
+
+    @Test
+    @DisplayName("testSetCurrentLevel")
+    void testSetCurrentLevel() {
+        model.setCurrentLevel(3);
+        assertEquals(3, model.getLevel());
+        
+        model.setCurrentLevel(10);
+        assertEquals(4, model.getLevel());
     }
 }

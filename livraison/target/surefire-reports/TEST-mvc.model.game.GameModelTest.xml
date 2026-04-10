@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="mvc.model.game.GameModelTest" time="0.023" tests="16" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="mvc.model.game.GameModelTest" time="0.486" tests="36" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="19"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -12,7 +12,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="MA"/>
     <property name="sun.boot.library.path" value="/Users/mac/Library/Java/JavaVirtualMachines/openjdk-19.0.1/Contents/Home/lib"/>
-    <property name="sun.java.command" value="/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/target/surefire/surefirebooter-20260409221648602_3.jar /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/target/surefire 2026-04-09T22-16-48_554-jvmRun1 surefire-20260409221648602_1tmp surefire_0-20260409221648602_2tmp"/>
+    <property name="sun.java.command" value="/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/target/surefire/surefirebooter-20260410120008826_3.jar /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/target/surefire 2026-04-10T12-00-08_748-jvmRun1 surefire-20260410120008826_1tmp surefire_0-20260410120008826_2tmp"/>
     <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/target/test-classes:/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/target/classes:/Users/mac/.m2/repository/org/junit/jupiter/junit-jupiter/5.10.0/junit-jupiter-5.10.0.jar:/Users/mac/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.0/junit-jupiter-api-5.10.0.jar:/Users/mac/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/Users/mac/.m2/repository/org/junit/platform/junit-platform-commons/1.10.0/junit-platform-commons-1.10.0.jar:/Users/mac/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/mac/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.10.0/junit-jupiter-params-5.10.0.jar:/Users/mac/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.0/junit-jupiter-engine-5.10.0.jar:/Users/mac/.m2/repository/org/junit/platform/junit-platform-engine/1.10.0/junit-platform-engine-1.10.0.jar:"/>
@@ -29,7 +29,7 @@
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="apple.awt.application.name" value="ForkedBooter"/>
-    <property name="surefire.real.class.path" value="/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/target/surefire/surefirebooter-20260409221648602_3.jar"/>
+    <property name="surefire.real.class.path" value="/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/target/surefire/surefirebooter-20260410120008826_3.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="java.runtime.version" value="19.0.1+10-21"/>
@@ -57,29 +57,65 @@
     <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="java.class.version" value="63.0"/>
   </properties>
-  <testcase name="testGetCurrentDrawingColor" classname="mvc.model.game.GameModelTest" time="0.001"/>
-  <testcase name="testAddBlueShapeOutsideGameArea" classname="mvc.model.game.GameModelTest" time="0.0">
+  <testcase name="testRestoreBlueShapeWithInvalidIndex" classname="mvc.model.game.GameModelTest" time="0.007">
+    <system-out><![CDATA[Numero de Blue Shapes: 1/4
+Score Actuel: 0
+]]></system-out>
+  </testcase>
+  <testcase name="testGetCurrentDrawingColorInSoloMode" classname="mvc.model.game.GameModelTest" time="0.001"/>
+  <testcase name="testGetCurrentDrawingColor" classname="mvc.model.game.GameModelTest" time="0.003"/>
+  <testcase name="testShowRedShapes" classname="mvc.model.game.GameModelTest" time="0.001"/>
+  <testcase name="testAddBlueShapeOutsideGameArea" classname="mvc.model.game.GameModelTest" time="0.002">
     <system-out><![CDATA[Pas possible out of arrea 
 ]]></system-out>
   </testcase>
-  <testcase name="testIsShapeWithinGameArea" classname="mvc.model.game.GameModelTest" time="0.001"/>
-  <testcase name="testAddBlueShape" classname="mvc.model.game.GameModelTest" time="0.003">
+  <testcase name="testIsShapeWithinGameArea" classname="mvc.model.game.GameModelTest" time="0.002"/>
+  <testcase name="testPlaceShapeExactlyOnBorderEdge" classname="mvc.model.game.GameModelTest" time="0.001">
+    <system-out><![CDATA[Pas possible out of arrea 
+]]></system-out>
+  </testcase>
+  <testcase name="testCantPlaceMoreThan4BlueShapesPerLevel" classname="mvc.model.game.GameModelTest" time="0.003">
+    <system-out><![CDATA[Numero de Blue Shapes: 1/4
+Score Actuel: 0
+Numero de Blue Shapes: 2/4
+Score Actuel: 0
+Numero de Blue Shapes: 3/4
+Score Actuel: 0
+Numero de Blue Shapes: 4/4
+Level 0 complet! Score: 5026
+Score Actuel: 5026
+]]></system-out>
+  </testcase>
+  <testcase name="testAddBlueShape" classname="mvc.model.game.GameModelTest" time="0.001">
     <system-out><![CDATA[Numero de Blue Shapes: 1/4
 Score Actuel: 0
 ]]></system-out>
   </testcase>
-  <testcase name="testCanPlaceBlueShapeNoIntersection" classname="mvc.model.game.GameModelTest" time="0.0">
+  <testcase name="testCanPlaceBlueShapeNoIntersection" classname="mvc.model.game.GameModelTest" time="0.001">
     <system-out><![CDATA[Numero de Blue Shapes: 1/4
 Score Actuel: 0
 ]]></system-out>
   </testcase>
-  <testcase name="testSetGameState" classname="mvc.model.game.GameModelTest" time="0.0"/>
-  <testcase name="testRemoveBlueShape" classname="mvc.model.game.GameModelTest" time="0.0">
+  <testcase name="testPlaceShapeExactlyOnGameAreaBorder" classname="mvc.model.game.GameModelTest" time="0.001"/>
+  <testcase name="testHideRedShapes" classname="mvc.model.game.GameModelTest" time="0.001"/>
+  <testcase name="testNextLevelIncrementsLevel" classname="mvc.model.game.GameModelTest" time="0.002"/>
+  <testcase name="testSetGameState" classname="mvc.model.game.GameModelTest" time="0.001"/>
+  <testcase name="testAreRedShapesVisibleInitially" classname="mvc.model.game.GameModelTest" time="0.001"/>
+  <testcase name="testGetLevelConfig" classname="mvc.model.game.GameModelTest" time="0.019"/>
+  <testcase name="testGetBlueShapesRemainingForLevel" classname="mvc.model.game.GameModelTest" time="0.039">
+    <system-out><![CDATA[Numero de Blue Shapes: 1/4
+Score Actuel: 0
+Numero de Blue Shapes: 2/4
+Score Actuel: 0
+]]></system-out>
+  </testcase>
+  <testcase name="testSetCurrentLevel" classname="mvc.model.game.GameModelTest" time="0.067"/>
+  <testcase name="testRemoveBlueShape" classname="mvc.model.game.GameModelTest" time="0.003">
     <system-out><![CDATA[Numero de Blue Shapes: 1/4
 Score Actuel: 0
 ]]></system-out>
   </testcase>
-  <testcase name="testFindBlueShapeAt" classname="mvc.model.game.GameModelTest" time="0.001">
+  <testcase name="testFindBlueShapeAt" classname="mvc.model.game.GameModelTest" time="0.006">
     <system-out><![CDATA[Numero de Blue Shapes: 1/4
 Score Actuel: 0
 ]]></system-out>
@@ -96,6 +132,25 @@ Generer 1 red shapes
 Pas possible intercection de figure de couleur diferente
 ]]></system-out>
   </testcase>
+  <testcase name="testGetFinalCoveredArea" classname="mvc.model.game.GameModelTest" time="0.004">
+    <system-out><![CDATA[Numero de Blue Shapes: 1/4
+Score Actuel: 0
+Numero de Blue Shapes: 2/4
+Score Actuel: 0
+Numero de Blue Shapes: 3/4
+Score Actuel: 0
+Numero de Blue Shapes: 4/4
+Level 0 complet! Score: 5769
+Score Actuel: 5769
+]]></system-out>
+  </testcase>
+  <testcase name="testGetLevelConfigWithInvalidLevel" classname="mvc.model.game.GameModelTest" time="0.001"/>
+  <testcase name="testGetRemainingRedTime" classname="mvc.model.game.GameModelTest" time="0.002">
+    <system-out><![CDATA[Level: 1, Red shapes pour generer: 2
+Generer 2 red shapes
+]]></system-out>
+  </testcase>
+  <testcase name="testSetGameAreaSize" classname="mvc.model.game.GameModelTest" time="0.001"/>
   <testcase name="testAddBlueShapeWhenGameFinished" classname="mvc.model.game.GameModelTest" time="0.001">
     <system-out><![CDATA[Numero de Blue Shapes: 1/4
 Score Actuel: 0
@@ -108,9 +163,39 @@ Level 0 complet! Score: 5026
 Score Actuel: 5026
 ]]></system-out>
   </testcase>
-  <testcase name="testFindBlueShapeAtNotFound" classname="mvc.model.game.GameModelTest" time="0.001">
+  <testcase name="testRemoveNonExistentShape" classname="mvc.model.game.GameModelTest" time="0.016"/>
+  <testcase name="testSetGameAreaSizeWithInvalidValues" classname="mvc.model.game.GameModelTest" time="0.012"/>
+  <testcase name="testGetStatistics" classname="mvc.model.game.GameModelTest" time="0.013">
     <system-out><![CDATA[Numero de Blue Shapes: 1/4
 Score Actuel: 0
+Numero de Blue Shapes: 2/4
+Score Actuel: 0
+========== GAME STATISTICS  0 ==========
+Total Score: 0
+Game State: WAITING_FOR_RED
+Red Shapes Visible: true
+Red Visible Time: 0
+Reds: 0
+Blues: 2
+Blue placed this level: 2/4
+
+]]></system-out>
+  </testcase>
+  <testcase name="testFindBlueShapeAtNotFound" classname="mvc.model.game.GameModelTest" time="0.003">
+    <system-out><![CDATA[Numero de Blue Shapes: 1/4
+Score Actuel: 0
+]]></system-out>
+  </testcase>
+  <testcase name="testIsGameFinished" classname="mvc.model.game.GameModelTest" time="0.001">
+    <system-out><![CDATA[Numero de Blue Shapes: 1/4
+Score Actuel: 0
+Numero de Blue Shapes: 2/4
+Score Actuel: 0
+Numero de Blue Shapes: 3/4
+Score Actuel: 0
+Numero de Blue Shapes: 4/4
+Level 0 complet! Score: 5026
+Score Actuel: 5026
 ]]></system-out>
   </testcase>
   <testcase name="testIsPointInsideGameArea" classname="mvc.model.game.GameModelTest" time="0.001"/>
@@ -119,7 +204,7 @@ Score Actuel: 0
 Score Actuel: 0
 ]]></system-out>
   </testcase>
-  <testcase name="testCalculateScore" classname="mvc.model.game.GameModelTest" time="0.0">
+  <testcase name="testCalculateScore" classname="mvc.model.game.GameModelTest" time="0.001">
     <system-out><![CDATA[Numero de Blue Shapes: 1/4
 Score Actuel: 0
 Numero de Blue Shapes: 2/4

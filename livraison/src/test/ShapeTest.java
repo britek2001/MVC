@@ -67,10 +67,10 @@ class ShapeTest {
     @Test
     @DisplayName("testCircleZoneType")
     void testCircleZoneType() {
-        assertTrue(circle.getZoneType(new Point2D.Double(100, 100)) == 1); // Center
-        assertTrue(circle.getZoneType(new Point2D.Double(110, 100)) == 1); // Inside center zone
-        assertTrue(circle.getZoneType(new Point2D.Double(118, 100)) == 0); // Edge zone
-        assertTrue(circle.getZoneType(new Point2D.Double(130, 100)) == -1); // Outside
+        assertEquals(1, circle.getZoneType(new Point2D.Double(100, 100))); // Center
+        assertEquals(1, circle.getZoneType(new Point2D.Double(110, 100))); // Inside center zone
+        assertEquals(0, circle.getZoneType(new Point2D.Double(118, 100))); // Edge zone
+        assertEquals(-1, circle.getZoneType(new Point2D.Double(130, 100))); // Outside
     }
 
     @Test
@@ -79,9 +79,9 @@ class ShapeTest {
         double centerX = 150 + 30; 
         double centerY = 150 + 25; 
         
-        assertTrue(rectangle.getZoneType(new Point2D.Double(centerX, centerY)) == 1);
-        assertTrue(rectangle.getZoneType(new Point2D.Double(155, 155)) == 0);
-        assertTrue(rectangle.getZoneType(new Point2D.Double(100, 100)) == -1);
+        assertEquals(1, rectangle.getZoneType(new Point2D.Double(centerX, centerY)));
+        assertEquals(0, rectangle.getZoneType(new Point2D.Double(155, 155)));
+        assertEquals(-1, rectangle.getZoneType(new Point2D.Double(100, 100)));
     }
 
     @Test

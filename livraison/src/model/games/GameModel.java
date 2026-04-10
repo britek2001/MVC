@@ -403,12 +403,18 @@ public class GameModel extends Observable {
     public boolean isShapeWithinGameArea(GameShape shape) {
         if (shape instanceof Rectangle) {
             Rectangle r = (Rectangle) shape;
+            if (r.width <= 0 || r.height <= 0) {
+                return false;
+            }
             return r.x >= 0 && r.y >= 0 && (r.x + r.width) <= width && (r.y + r.height) <= height;
         }
 
         if (shape instanceof Circle) {
             Circle c = (Circle) shape;
             double radius = c.getRadius();
+            if (radius <= 0) {
+                return false;
+            }
             return (c.getX() - radius) >= 0
                     && (c.getY() - radius) >= 0
                     && (c.getX() + radius) <= width

@@ -112,4 +112,46 @@ class CommandTest {
         cmd.redo();
         assertEquals(originalRadius * factor, testCircle.getRadius(), 0.01);
     }
+
+    @Test
+    @DisplayName("testResizeShapeCommandRectangle")
+    void testResizeShapeCommandRectangle() {
+        model.addBlueShape(testRectangle);
+        double originalWidth = testRectangle.width;
+        double originalHeight = testRectangle.height;
+        double factorX = 1.5;
+        double factorY = 0;
+        
+        ResizeShapeCommand cmd = new ResizeShapeCommand(model, testRectangle, factorX, factorY);
+        
+        // Execute
+        cmd.execut();
+        assertEquals(originalWidth * factorX, testRectangle.width, 0.01);
+        assertEquals(originalHeight * factorX, testRectangle.height, 0.01);
+        
+        // Undo
+        cmd.undo();
+        assertEquals(originalWidth, testRectangle.width, 0.01);
+        assertEquals(originalHeight, testRectangle.height, 0.01);
+        
+        // Redo
+        cmd.redo();
+        assertEquals(originalWidth * factorX, testRectangle.width, 0.01);
+        assertEquals(originalHeight * factorX, testRectangle.height, 0.01);
+    }
+
+    @Test
+    @DisplayName("testResizeShapeCommandRectangleWithZeroFactor")
+    void testResizeShapeCommandRectangleWithZeroFactor() {
+        model.addBlueShape(testRectangle);
+        double originalWidth = testRectangle.width;
+        double originalHeight = testRectangle.height;
+        
+        ResizeShapeCommand cmd = new ResizeShapeCommand(model, testRectangle, 0, 0);
+        
+        cmd.execut();
+        assertEquals(originalWidth, testRectangle.width, 0.01);
+        assertEquals(originalHeight, testRectangle.height, 0.01);
+    }
+
 }

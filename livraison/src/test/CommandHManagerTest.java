@@ -68,15 +68,11 @@ class CommandHManagerTest {
         manager.executeAndStore(cmd1);
         manager.undo();
         
-        // Redo should be available
         assertTrue(manager.redo());
         
-        // Execute new command
         Circle anotherCircle = new Circle(200, 200, 15, Color.BLUE);
         CreateShapeCommand cmd2 = new CreateShapeCommand(model, anotherCircle);
         manager.executeAndStore(cmd2);
-        
-        // Redo should not be available (stack cleared)
         assertFalse(manager.redo());
     }
 

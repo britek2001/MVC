@@ -1,3 +1,4 @@
+package mvc;
 import javax.swing.*;
 import mvc.model.game.LevelConfig;
 import mvc.model.game.Player;
