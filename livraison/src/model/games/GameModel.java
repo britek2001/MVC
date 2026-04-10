@@ -242,9 +242,13 @@ public class GameModel extends Observable {
                     if (!globalTimerStarted || generationStrategy == null) {
                         finishGame(true);
                     } else {
-                        int nextLevel = Math.min(currentLevel + 1, MAX_LEVEL);
-                        LevelConfig cfg = getLevelConfig(nextLevel);
-                        generateRedShapes(cfg.redShapeCount, width, height);
+                        if (currentLevel >= MAX_LEVEL) {
+                            finishGame(true);
+                        } else {
+                            int nextLevel = currentLevel + 1;
+                            LevelConfig cfg = getLevelConfig(nextLevel);
+                            generateRedShapes(cfg.redShapeCount, width, height);
+                        }
                     }
                 }
             }
@@ -292,7 +296,9 @@ public class GameModel extends Observable {
     }
 
     public void nextLevel() {
-        currentLevel++;
+        if (currentLevel < MAX_LEVEL) {
+            currentLevel++;
+        }
     }
 
     public void enableTwoPlayerMode(String redName, String blueName) {
