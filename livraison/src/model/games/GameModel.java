@@ -50,6 +50,7 @@ public class GameModel extends Observable {
     private static final int MAX_LEVEL = 5;
     private static final int MAX_TURNS_PER_PLAYER = 4;
     private long redShapesVisibleUntil;
+    private long twoPlayerGameStartTime;
     private static final LevelConfig DEFAULT_LEVEL_CONFIG = new  LevelConfig(2, 10, "Facile", "2 petits rectangles");
     public GameModel() {
         redShapes = new ArrayList<>();
@@ -111,7 +112,7 @@ public class GameModel extends Observable {
 
     public LevelConfig getLevelConfig(int level) {
         return LEVEL_CONFIGS.getOrDefault(level, DEFAULT_LEVEL_CONFIG);
-    }
+    }  
 
 
     public boolean validateMove(double newX, double newY) {
@@ -142,7 +143,7 @@ public class GameModel extends Observable {
         int levelToGenerate = Math.min(currentLevel + 1, MAX_LEVEL);
         LevelConfig cfg = getLevelConfig(levelToGenerate);
         count = Math.min(count, cfg.redShapeCount);
-        startGlobalGameTimerIfNeeded();
+        startGameTimerForLevel();
 
         System.out.println("Level: " + levelToGenerate + ", Red shapes pour generer: " + count);
 
@@ -209,6 +210,15 @@ public class GameModel extends Observable {
     public boolean addBlueShape(GameShape shape) {
         if (gameFinished) {
             return false;
+        }
+
+        // Vérifier si le temps global est écoulé en mode deux joueurs
+        if (twoPlayerMode) {
+            long elapsedTime = System.currentTimeMillis() - twoPlayerGameStartTime;
+            if (elapsedTime > TOTAL_GAME_DURATION_MILLIS) {
+                finishTwoPlayerGameByTime(); // Celui avec le score le plus bas perd
+                return false;
+            }
         }
 
         if (twoPlayerMode) {
@@ -319,6 +329,7 @@ public class GameModel extends Observable {
         gameEndsAtMillis = 0;
         currentGameTimeLimitMillis = TOTAL_GAME_DURATION_MILLIS;
         globalTimerStarted = false;
+        twoPlayerGameStartTime = System.currentTimeMillis();
         modelChanged("TWO_PLAYER_ENABLED");
     }
 
@@ -341,6 +352,24 @@ public class GameModel extends Observable {
         finalCoveredArea = calculateScore();
         totalScore = finalCoveredArea;
         state = GameState.GAME_OVER;
+        modelChanged("GAME_OVER");
+    }
+
+    private void finishTwoPlayerGameByTime() {
+        gameFinished = true;
+        // Le joueur avec le score le plus bas perd
+        // Donc gameWon = true si le score du joueur courant est plus élevé
+        gameWon = redPlayerScore > bluePlayerScore;
+        magistralWin = false;
+        finalCoveredArea = Math.max(redPlayerScore, bluePlayerScore);
+        totalScore = redPlayerScore + bluePlayerScore;
+        state = GameState.GAME_OVER;
+        System.out.println("Temps écoulé! Score Rouge: " + redPlayerScore + " | Score Bleu: " + bluePlayerScore);
+        if (gameWon) {
+            System.out.println("Le Joueur Rouge gagne!");
+        } else {
+            System.out.println("Le Joueur Bleu gagne!");
+        }
         modelChanged("GAME_OVER");
     }
 
@@ -468,6 +497,13 @@ public class GameModel extends Observable {
     }
 
     public long getRemainingGameTime() {
+        if (twoPlayerMode) {
+            // En mode deux joueurs, retourner le temps restant global
+            long elapsedTime = System.currentTimeMillis() - twoPlayerGameStartTime;
+            long remainingTime = TOTAL_GAME_DURATION_MILLIS - elapsedTime;
+            return Math.max(remainingTime, 0);
+        }
+        
         if (!globalTimerStarted || gameEndsAtMillis <= 0) {
             return currentGameTimeLimitMillis;
         }
@@ -479,8 +515,8 @@ public class GameModel extends Observable {
         return currentGameTimeLimitMillis;
     }
 
-    private void startGlobalGameTimerIfNeeded() {
-        if (globalTimerStarted || gameFinished) {
+    private void startGameTimerForLevel() {
+        if (gameFinished) {
             return;
         }
 
