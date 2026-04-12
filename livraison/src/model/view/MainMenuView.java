@@ -14,12 +14,20 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import mvc.model.view.theme.StyledButtonFactory;
+import mvc.model.view.theme.ThemeManager;
+import mvc.model.view.theme.ThemeStrategyFactory;
 
 public class MainMenuView {
+
+    public static final String STRATEGY_RANDOM = "Random Generation";
+    public static final String STRATEGY_AI = "AI Player";
+    public static final String STRATEGY_TWO_PLAYERS = "Two Players";
 
     public record MenuSelection(
             int level,
             String difficultyLabel,
+            String strategyLabel,
             boolean isTwoPlayers,
             String redPlayerName,
             String bluePlayerName) {
@@ -39,20 +47,26 @@ public class MainMenuView {
             panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
             JLabel strategyLabel = new JLabel("Selection de strategie:");
-            String[] strategies = {"Random Generation", "Two Players"};
+            String[] strategies = {STRATEGY_RANDOM, STRATEGY_AI, STRATEGY_TWO_PLAYERS};
             JComboBox<String> strategyComboBox = new JComboBox<>(strategies);
 
             JLabel difficultyLabel = new JLabel("Selection de Difficulte:");
             String[] difficulties = {"Facile", "Moyen", "Difficile", "Tres difficile", "Extreme"};
             JComboBox<String> difficultyComboBox = new JComboBox<>(difficulties);
 
-            JButton startButton = new JButton(" Comencer le jeu ");
-            startButton.addActionListener(e -> {
+            JLabel themeLabel = new JLabel("Theme:");
+            String[] themes = {ThemeStrategyFactory.THEME_LIGHT, ThemeStrategyFactory.THEME_DARK};
+            JComboBox<String> themeComboBox = new JComboBox<>(themes);
+
+            StyledButtonFactory buttonFactory = new StyledButtonFactory(ThemeManager.getCurrentTheme());
+            JButton startButton = buttonFactory.createPrimaryButton(" Comencer le jeu ", () -> {
                 String selectedStrategy = (String) strategyComboBox.getSelectedItem();
                 String selectedDifficulty = (String) difficultyComboBox.getSelectedItem();
+                String selectedTheme = (String) themeComboBox.getSelectedItem();
+                ThemeManager.setCurrentTheme(ThemeStrategyFactory.fromName(selectedTheme));
                 int level = mapDifficultyToLevel(selectedDifficulty);
 
-                if ("Two Players".equals(selectedStrategy)) {
+                if (STRATEGY_TWO_PLAYERS.equals(selectedStrategy)) {
                     MenuSelection selection = askTwoPlayerNames(menuFrame, level, selectedDifficulty);
                     if (selection == null) {
                         return;
@@ -64,13 +78,15 @@ public class MainMenuView {
                 }
 
                 menuFrame.dispose();
-                onStart.accept(new MenuSelection(level, selectedDifficulty, false, "", ""));
+                onStart.accept(new MenuSelection(level, selectedDifficulty, selectedStrategy, false, "", ""));
             });
 
             panel.add(strategyLabel);
             panel.add(strategyComboBox);
             panel.add(difficultyLabel);
             panel.add(difficultyComboBox);
+            panel.add(themeLabel);
+            panel.add(themeComboBox);
             panel.add(startButton);
 
             menuFrame.add(panel);
@@ -102,6 +118,7 @@ public class MainMenuView {
         return new MenuSelection(
                 level,
                 difficultyLabel,
+            STRATEGY_TWO_PLAYERS,
                 true,
                 redPlayerField.getText(),
                 bluePlayerField.getText());

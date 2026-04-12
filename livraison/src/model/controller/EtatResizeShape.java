@@ -64,6 +64,9 @@ public class EtatResizeShape implements EtatInteraction {
     
     @Override
     public void sourisAppuyee(MouseEvent e, ControleurSouris controller) {
+        if (model.isGameFinished() || model.getState() == GameState.GAME_OVER) {
+            return;
+        }
         resizeHandle = getResizeHandle(e.getX(), e.getY());
         if (resizeHandle != -1) {
             startX = e.getX();
@@ -86,6 +89,9 @@ public class EtatResizeShape implements EtatInteraction {
     
     @Override
     public void sourisDeplacee(MouseEvent e, ControleurSouris controller) {
+        if (model.isGameFinished() || model.getState() == GameState.GAME_OVER) {
+            return;
+        }
         if (dragging && selectedShape != null) {
             double deltaX = e.getX() - startX;
             double deltaY = e.getY() - startY;
@@ -132,6 +138,11 @@ public class EtatResizeShape implements EtatInteraction {
     
     @Override
     public void sourisRelachee(MouseEvent e, ControleurSouris controller) {
+        if (model.isGameFinished() || model.getState() == GameState.GAME_OVER) {
+            dragging = false;
+            controller.changerEtat(new EtatSelection(model));
+            return;
+        }
         if (dragging) {
             boolean intersectsRed = model.getRedShapes().stream()
                     .anyMatch(redShape -> redShape.intersects(selectedShape));

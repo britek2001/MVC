@@ -24,6 +24,9 @@ public class EtatMoveShape implements EtatInteraction {
     
     @Override
     public void sourisAppuyee(MouseEvent e, ControleurSouris controller) {
+        if (model.isGameFinished() || model.getState() == GameState.GAME_OVER) {
+            return;
+        }
         if (selectedShape != null && selectedShape.contains(new Point2D.Double(e.getX(), e.getY()))) {
             startX = e.getX();
             startY = e.getY();
@@ -35,6 +38,9 @@ public class EtatMoveShape implements EtatInteraction {
     
     @Override
     public void sourisDeplacee(MouseEvent e, ControleurSouris controller) {
+        if (model.isGameFinished() || model.getState() == GameState.GAME_OVER) {
+            return;
+        }
         if (dragging && selectedShape != null) {
             double deltaX = e.getX() - startX;
             double deltaY = e.getY() - startY;
@@ -47,6 +53,11 @@ public class EtatMoveShape implements EtatInteraction {
     
     @Override
     public void sourisRelachee(MouseEvent e, ControleurSouris controller) {
+        if (model.isGameFinished() || model.getState() == GameState.GAME_OVER) {
+            dragging = false;
+            controller.changerEtat(new EtatSelection(model));
+            return;
+        }
         if (dragging && selectedShape != null) {
 
             boolean intersectsRed = model.getRedShapes().stream()

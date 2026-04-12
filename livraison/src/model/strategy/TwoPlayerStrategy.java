@@ -1,7 +1,7 @@
 package mvc.model.strategies;
 
-import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import mvc.model.shapes.GameShape;
 
@@ -10,35 +10,27 @@ public class TwoPlayerStrategy implements ShapeGenerationStrategy {
     private List<List<GameShape>> player1Shapes;
     private List<List<GameShape>> player2Shapes;
     private int currentRound;
-    private int currentPlayer; 
     private boolean isPlayer1TurnToDraw;
     
     public TwoPlayerStrategy() {
         player1Shapes = new ArrayList<>();
         player2Shapes = new ArrayList<>();
         currentRound = 0;
-        currentPlayer = 0;
         isPlayer1TurnToDraw = true;
     }
     
     @Override
     public List<GameShape> generateShapes(int count, int panelWidth, int panelHeight) {
-        if (isPlayer1TurnToDraw) {
-            return new ArrayList<>();
-        } else {
-            if (currentRound < player1Shapes.size()) {
-                return cloneShapes(player1Shapes.get(currentRound));
-            }
-            return new ArrayList<>();
-        }
+        return Collections.emptyList();
     }
     
     public void submitPlayerShapes(List<GameShape> shapes) {
+        List<GameShape> safeShapes = cloneShapes(shapes);
         if (isPlayer1TurnToDraw) {
-            player1Shapes.add(shapes);
+            player1Shapes.add(safeShapes);
             isPlayer1TurnToDraw = false;
         } else {
-            player2Shapes.add(shapes);
+            player2Shapes.add(safeShapes);
             isPlayer1TurnToDraw = true;
             currentRound++;
         }
@@ -79,11 +71,7 @@ public class TwoPlayerStrategy implements ShapeGenerationStrategy {
     }
     
     public String getCurrentPlayerMessage() {
-        if (isPlayer1TurnToDraw) {
-            return "Joueur 1 ";
-        } else {
-            return "Joueur 2 ";
-        }
+        return isPlayer1TurnToDraw ? "Joueur 1" : "Joueur 2";
     }
     
     @Override

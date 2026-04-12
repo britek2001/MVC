@@ -21,6 +21,7 @@ public class GameModel extends Observable {
     private static final int BLUE_SHAPES_PER_LEVEL = 4;
     private static final long TOTAL_GAME_DURATION_MILLIS = 60_000L;
     private boolean redShapesVisible = true;
+    private boolean redShapesShownForGameEnd = false;
     private final Timer timer = new Timer(true); 
     private List<GameShape> redShapes;
     private List<GameShape> blueShapes;
@@ -31,7 +32,9 @@ public class GameModel extends Observable {
     private int totalScore;
     private int width;
     private int height;
+    private int gameAreaTopInset;
     private boolean twoPlayerMode;
+    private boolean aiPlayerMode;
     private String redPlayerName;
     private String bluePlayerName;
     private boolean redPlayerTurn;
@@ -60,8 +63,10 @@ public class GameModel extends Observable {
         totalScore = 0;
         width = 800;
         height = 600;
+        gameAreaTopInset = 0;
         blueShapesPlacedThisLevel = 0;
         twoPlayerMode = false;
+        aiPlayerMode = false;
         redPlayerName = "Joueur Rouge";
         bluePlayerName = "Joueur Bleu";
         redPlayerTurn = true;
@@ -97,7 +102,11 @@ public class GameModel extends Observable {
     }
 
     public void showRedShapes() {
+        if (gameFinished && redShapesShownForGameEnd) {
+            return;
+        }
         redShapesVisible = true;
+        redShapesShownForGameEnd = gameFinished;
         state = GameState.RED_VISIBLE;
         modelChanged("RED_VISIBLE");
     }
@@ -150,8 +159,11 @@ public class GameModel extends Observable {
         if (!twoPlayerMode) {
             redShapes.clear();
             blueShapes.clear();
+        } else if (aiPlayerMode) {
+            redShapes.clear();
         }
         blueShapesPlacedThisLevel = 0;
+        redShapesShownForGameEnd = false;
         showRedShapes();
         redShapesVisibleUntil = System.currentTimeMillis() + (cfg.timeSeconds * 1000L);
         currentRedTimeLimitMillis = cfg.timeSeconds * 1000L;
@@ -163,7 +175,6 @@ public class GameModel extends Observable {
         }
 
         redShapes.addAll(newRedShapes);
-        clampShapesToGameArea(redShapes);
         System.out.println("Generer " + redShapes.size() + " red shapes");
         modelChanged("RED_SHAPES_GENERATED");
 
@@ -209,15 +220,31 @@ public class GameModel extends Observable {
     }
 
     public boolean addBlueShape(GameShape shape) {
+        return addBlueShape(shape, false);
+    }
+
+    public boolean addBlueShapeFromAI(GameShape shape) {
+        return addBlueShape(shape, true);
+    }
+
+    private boolean addBlueShape(GameShape shape, boolean fromAI) {
         if (gameFinished) {
             return false;
         }
 
-        // Vérifier si le temps global est écoulé en mode deux joueurs
+        if (twoPlayerMode && aiPlayerMode) {
+            if (redPlayerTurn && !fromAI) {
+                return false;
+            }
+            if (!redPlayerTurn && fromAI) {
+                return false;
+            }
+        }
+
         if (twoPlayerMode) {
             long elapsedTime = System.currentTimeMillis() - twoPlayerGameStartTime;
             if (elapsedTime > TOTAL_GAME_DURATION_MILLIS) {
-                finishTwoPlayerGameByTime(); // Celui avec le score le plus bas perd
+                finishTwoPlayerGameByTime();
                 return false;
             }
         }
@@ -235,12 +262,16 @@ public class GameModel extends Observable {
             shape.setColor(getCurrentDrawingColor());
             blueShapes.add(shape);
             blueShapesPlacedThisLevel++;
+            int currentScore = calculateScore();
+            if (!twoPlayerMode) {
+                totalScore = currentScore;
+            }
             System.out.println("Numero de Blue Shapes: " + getBlueShapesPlacedThisLevel() + "/" + BLUE_SHAPES_PER_LEVEL);
             if (getBlueShapesPlacedThisLevel() == BLUE_SHAPES_PER_LEVEL) {
-                System.out.println("Level " + currentLevel + " complet! Score: " + calculateScore());
+                System.out.println("Level " + currentLevel + " complet! Score: " + currentScore);
                 if (twoPlayerMode) {
                     state = GameState.LEVEL_COMPLETE;
-                    int score = calculateScore();
+                    int score = currentScore;
                     totalScore += score;
                     if (redPlayerTurn) {
                         redPlayerScore += score;
@@ -263,7 +294,7 @@ public class GameModel extends Observable {
                     }
                 }
             }
-            System.out.println("Score Actuel: " + totalScore);
+            System.out.println("Score Actuel: " + currentScore);
             modelChanged("BLUE_SHAPE_ADDED");
             return true;
         }
@@ -283,6 +314,9 @@ public class GameModel extends Observable {
             if (blueShapesPlacedThisLevel > 0) {
                 blueShapesPlacedThisLevel--;
             }
+            if (!twoPlayerMode) {
+                totalScore = calculateScore();
+            }
             modelChanged("BLUE_SHAPE_REMOVED");
         }
     }
@@ -292,6 +326,9 @@ public class GameModel extends Observable {
         shape.setColor(getCurrentDrawingColor());
         blueShapes.add(safeIndex, shape);
         blueShapesPlacedThisLevel++;
+        if (!twoPlayerMode) {
+            totalScore = calculateScore();
+        }
         modelChanged("BLUE_SHAPE_RESTORED");
     }
 
@@ -356,10 +393,16 @@ public class GameModel extends Observable {
         modelChanged("GAME_OVER");
     }
 
+    public void endGame() {
+        if (twoPlayerMode) {
+            finishTwoPlayerGameByTime();
+        } else {
+            finishGame(false);
+        }
+    }
+
     private void finishTwoPlayerGameByTime() {
         gameFinished = true;
-        // Le joueur avec le score le plus bas perd
-        // Donc gameWon = true si le score du joueur courant est plus élevé
         gameWon = redPlayerScore > bluePlayerScore;
         magistralWin = false;
         finalCoveredArea = Math.max(redPlayerScore, bluePlayerScore);
@@ -403,9 +446,10 @@ public class GameModel extends Observable {
         }
 
         redPlayerTurn = !redPlayerTurn;
-        int nextLevel = Math.min(currentLevel + 1, MAX_LEVEL);
-        LevelConfig cfg = getLevelConfig(nextLevel);
-        generateRedShapes(cfg.redShapeCount, width, height);
+        blueShapesPlacedThisLevel = 0;
+        redShapesShownForGameEnd = false;
+        state = GameState.PLACING_BLUE;
+        modelChanged("TWO_PLAYER_TURN_CHANGED");
     }
     
 
@@ -435,9 +479,12 @@ public class GameModel extends Observable {
     }
     public int getTotalScore() { return totalScore; }
     public boolean isTwoPlayerMode() { return twoPlayerMode; }
+    public boolean isAIPlayerMode() { return aiPlayerMode; }
+    public void setAIPlayerMode(boolean value) { aiPlayerMode = value; }
     public String getRedPlayerName() { return redPlayerName; }
     public String getBluePlayerName() { return bluePlayerName; }
     public boolean isRedPlayerTurn() { return redPlayerTurn; }
+    public void setRedPlayerTurn(boolean value) { redPlayerTurn = value; }
     public String getCurrentPlayerName() { return redPlayerTurn ? redPlayerName : bluePlayerName; }
     public String getCurrentPlayerColorLabel() { return redPlayerTurn ? "ROUGE" : "BLEU"; }
     public int getTurnsPlayed() { return turnsPlayed; }
@@ -453,42 +500,18 @@ public class GameModel extends Observable {
     public void setGameAreaSize(int newWidth, int newHeight) {
         width = Math.max(1, newWidth);
         height = Math.max(1, newHeight);
-        clampShapesToGameArea(redShapes);
-        clampShapesToGameArea(blueShapes);
     }
 
-    private void clampShapesToGameArea(List<GameShape> shapes) {
-        for (GameShape shape : shapes) {
-            keepShapeInsideGameArea(shape);
-        }
+    public void setGameAreaTopInset(int topInset) {
+        gameAreaTopInset = Math.max(0, topInset);
     }
 
-    private void keepShapeInsideGameArea(GameShape shape) {
-        if (shape instanceof Rectangle) {
-            Rectangle r = (Rectangle) shape;
-            r.width = Math.max(1, Math.min(r.width, width));
-            r.height = Math.max(1, Math.min(r.height, height));
-            double clampedX = Math.max(0, Math.min(r.x, width - r.width));
-            double clampedY = Math.max(0, Math.min(r.y, height - r.height));
-            r.setPosition(clampedX, clampedY);
-            return;
-        }
-
-        if (shape instanceof Circle) {
-            Circle c = (Circle) shape;
-            double maxRadius = Math.max(1, Math.min(width, height) / 2.0);
-            if (c.getRadius() > maxRadius) {
-                c.resize(maxRadius / c.getRadius());
-            }
-            double radius = c.getRadius();
-            double clampedX = Math.max(radius, Math.min(c.getX(), width - radius));
-            double clampedY = Math.max(radius, Math.min(c.getY(), height - radius));
-            c.setPosition(clampedX, clampedY);
-        }
+    public int getGameAreaTopInset() {
+        return gameAreaTopInset;
     }
 
     public boolean isPointInsideGameArea(double x, double y) {
-        return x >= 0 && y >= 0 && x <= width && y <= height;
+        return x >= 0 && y >= gameAreaTopInset && x <= width && y <= height;
     }
 
     public boolean isShapeWithinGameArea(GameShape shape) {
@@ -497,7 +520,10 @@ public class GameModel extends Observable {
             if (r.width <= 0 || r.height <= 0) {
                 return false;
             }
-            return r.x >= 0 && r.y >= 0 && (r.x + r.width) <= width && (r.y + r.height) <= height;
+            return r.x >= 0
+                    && r.y >= gameAreaTopInset
+                    && (r.x + r.width) <= width
+                    && (r.y + r.height) <= height;
         }
 
         if (shape instanceof Circle) {
@@ -507,7 +533,7 @@ public class GameModel extends Observable {
                 return false;
             }
             return (c.getX() - radius) >= 0
-                    && (c.getY() - radius) >= 0
+                    && (c.getY() - radius) >= gameAreaTopInset
                     && (c.getX() + radius) <= width
                     && (c.getY() + radius) <= height;
         }
@@ -531,7 +557,6 @@ public class GameModel extends Observable {
 
     public long getRemainingGameTime() {
         if (twoPlayerMode) {
-            // En mode deux joueurs, retourner le temps restant global
             long elapsedTime = System.currentTimeMillis() - twoPlayerGameStartTime;
             long remainingTime = TOTAL_GAME_DURATION_MILLIS - elapsedTime;
             return Math.max(remainingTime, 0);

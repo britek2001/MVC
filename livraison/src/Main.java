@@ -7,6 +7,7 @@ import mvc.model.shapes.GameShape;
 import mvc.model.game.GameModel;
 import mvc.model.strategies.ShapeGenerationStrategy;
 import mvc.model.strategies.ClickPlacementStrategy;
+import mvc.model.strategies.AIPlayerStrategy;
 import mvc.model.strategies.RandomGenerationStrategy;
 import mvc.model.view.GameView;
 import mvc.model.view.MainMenuView;
@@ -18,7 +19,6 @@ public class Main {
     private static final int WINDOW_WIDTH = 1180;
     private static final int WINDOW_HEIGHT = 890;
     private static final int INFO_PANEL_WIDTH = 400;
-    private static final int GAME_AREA_WIDTH = WINDOW_WIDTH - INFO_PANEL_WIDTH;
     private static List<Command> commandHistory = new ArrayList<>();
     private enum CommandType {
         CREATE,
@@ -38,14 +38,24 @@ public class Main {
             ShapeGenerationStrategy strategy;
             if (selection.isTwoPlayers()) {
                 game.enableTwoPlayerMode(selection.redPlayerName(), selection.bluePlayerName());
+                game.setAIPlayerMode(false);
                 strategy = new ClickPlacementStrategy();
                 game.setGenerationStrategy(strategy);
                 System.out.println("Strategy: Two Players");
                 System.out.println("Jouer Red: " + game.getRedPlayerName());
                 System.out.println("Jouer Blue: " + game.getBluePlayerName());
+            } else if (MainMenuView.STRATEGY_AI.equals(selection.strategyLabel())) {
+                game.enableTwoPlayerMode("IA", "Humain");
+                game.setAIPlayerMode(true);
+                game.setRedPlayerTurn(false);
+                strategy = new AIPlayerStrategy();
+                game.setGenerationStrategy(new ClickPlacementStrategy());
+                System.out.println("Strategy: AI Player");
+                System.out.println("Mode: Alternance Humain (Bleu) vs IA (Rouge)");
             } else {
                 strategy = new RandomGenerationStrategy();
                 game.disableTwoPlayerMode();
+                game.setAIPlayerMode(false);
                 game.setGenerationStrategy(strategy);
                 System.out.println("Strategy: Random Generation");
                 System.out.println("Difficulte: " + selection.difficultyLabel());
@@ -53,27 +63,37 @@ public class Main {
 
             LevelConfig config = game.getLevelConfig(selection.level());
             game.setCurrentLevel(selection.level() - 1);
-            game.setGameAreaSize(GAME_AREA_WIDTH, WINDOW_HEIGHT);
-            game.generateRedShapes(config.redShapeCount, GAME_AREA_WIDTH, WINDOW_HEIGHT);
-
-            System.out.println("Temps  pour definir les formes: " + config.timeSeconds + " secondes");
-            startGame(game, strategy);
+            startGame(game, strategy, selection.strategyLabel(), config);
         });
     }
 
-    private static void startGame(GameModel game, ShapeGenerationStrategy strategy) {
+    private static void startGame(GameModel game, ShapeGenerationStrategy strategy, String strategyLabel, LevelConfig config) {
         SwingUtilities.invokeLater(() -> {
             ControleurSouris controller = new ControleurSouris(new EtatSelection(game));
             JFrame frame = new JFrame("Jeu Rectangle et Cercle " + strategy.getStrategyName());
+            AIPlayerStrategy aiStrategy = (strategy instanceof AIPlayerStrategy) ? (AIPlayerStrategy) strategy : null;
             GameView view = new GameView(game, controller, () -> {
                 frame.dispose();
                 showMenu(new GameModel());
-            });
+            }, aiStrategy);
             frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             frame.setContentPane(view);
             frame.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
+
+            SwingUtilities.invokeLater(() -> {
+                int realGameAreaWidth = Math.max(1, view.getWidth() - INFO_PANEL_WIDTH);
+                int realGameAreaHeight = Math.max(1, view.getHeight());
+                game.setGameAreaSize(realGameAreaWidth, realGameAreaHeight);
+
+                if (MainMenuView.STRATEGY_RANDOM.equals(strategyLabel)) {
+                    game.generateRedShapes(config.redShapeCount, realGameAreaWidth, realGameAreaHeight);
+                    System.out.println("Temps  pour definir les formes: " + config.timeSeconds + " secondes");
+                } else {
+                    System.out.println("Mode " + strategyLabel + ": pas de generation automatique de formes");
+                }
+            });
         });
     }
 
