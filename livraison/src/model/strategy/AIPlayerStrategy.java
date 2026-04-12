@@ -9,6 +9,7 @@ import mvc.model.shapes.Rectangle;
 import mvc.model.shapes.Circle;
 
 public class AIPlayerStrategy implements ShapeGenerationStrategy {
+    private static final int TOP_SAFE_MARGIN = 86;
     private final List<List<GameShape>> humanRounds = new ArrayList<>();
     private final List<List<GameShape>> aiRounds = new ArrayList<>();
     private int currentRound = 0;
@@ -21,20 +22,21 @@ public class AIPlayerStrategy implements ShapeGenerationStrategy {
         this.panelWidth = panelWidth;
         this.panelHeight = panelHeight;
         if (isHumanTurn) {
-            // Human's turn: wait for user input, return empty list
             return new ArrayList<>();
         } else {
-            // AI's turn: generate 4 valid shapes
             List<GameShape> aiShapes = new ArrayList<>();
             int attempts = 0;
             while (aiShapes.size() < count && attempts < 1000) {
-                GameShape candidate = randomShape();
+                GameShape candidate = randomShape(attempts, count, aiShapes.size());
                 if (isValidPlacement(candidate, aiShapes)) {
                     aiShapes.add(candidate);
                 }
                 attempts++;
             }
-            aiRounds.add(new ArrayList<>(aiShapes));
+
+            if (!aiShapes.isEmpty()) {
+                aiRounds.add(new ArrayList<>(aiShapes));
+            }
             return aiShapes;
         }
     }
@@ -82,25 +84,66 @@ public class AIPlayerStrategy implements ShapeGenerationStrategy {
         return total;
     }
 
-    private GameShape randomShape() {
+    private GameShape randomShape(int attempts, int targetCount, int placedCount) {
+        int minY = Math.min(TOP_SAFE_MARGIN, Math.max(0, panelHeight - 1));
+        int usableWidth = Math.max(1, panelWidth);
+        int usableHeight = Math.max(1, panelHeight - minY);
+
+        boolean tightSpace = usableWidth < 360 || usableHeight < 260 || random.nextDouble() < 0.35;
+        double attemptPressure = Math.min(1.0, attempts / 1000.0);
+        double progress = targetCount <= 0 ? 0.0 : (placedCount / (double) targetCount);
+        boolean aggressive = attemptPressure > 0.35 || progress > 0.5;
+        boolean ultraAggressive = attemptPressure > 0.7;
+
         int type = random.nextInt(2);
-        int x = 50 + random.nextInt(Math.max(1, panelWidth - 150));
-        int y = 50 + random.nextInt(Math.max(1, panelHeight - 150));
+
         if (type == 0) {
-            return new Rectangle(x, y, 60, 40, Color.BLUE);
+            int rectW;
+            int rectH;
+            if (ultraAggressive) {
+                rectW = 14 + random.nextInt(13);
+                rectH = 10 + random.nextInt(11);
+            } else if (aggressive) {
+                rectW = 18 + random.nextInt(20);
+                rectH = 12 + random.nextInt(16);
+            } else if (tightSpace) {
+                rectW = 24 + random.nextInt(33);
+                rectH = 18 + random.nextInt(25);
+            } else {
+                rectW = 44 + random.nextInt(33);
+                rectH = 30 + random.nextInt(21);
+            }
+
+            int maxX = Math.max(1, panelWidth - rectW);
+            int maxY = Math.max(minY + 1, panelHeight - rectH);
+            int x = random.nextInt(maxX);
+            int y = minY + random.nextInt(Math.max(1, maxY - minY));
+
+            return new Rectangle(x, y, rectW, rectH, Color.BLUE);
         } else {
-            return new Circle(x, y, 25, Color.BLUE);
+            int radius;
+            if (ultraAggressive) {
+                radius = 6 + random.nextInt(6);
+            } else if (aggressive) {
+                radius = 8 + random.nextInt(8);
+            } else if (tightSpace) {
+                radius = 10 + random.nextInt(11);
+            } else {
+                radius = 16 + random.nextInt(13);
+            }
+            int minX = radius;
+            int maxX = Math.max(minX + 1, panelWidth - radius);
+            int minCY = Math.max(minY + radius, radius);
+            int maxCY = Math.max(minCY + 1, panelHeight - radius);
+
+            int x = minX + random.nextInt(Math.max(1, maxX - minX));
+            int y = minCY + random.nextInt(Math.max(1, maxCY - minCY));
+
+            return new Circle(x, y, radius, Color.BLUE);
         }
     }
 
     private boolean isValidPlacement(GameShape candidate, List<GameShape> currentShapes) {
-        for (List<GameShape> round : aiRounds) {
-            for (GameShape shape : round) {
-                if (candidate.intersects(shape)) {
-                    return false;
-                }
-            }
-        }
         for (GameShape shape : currentShapes) {
             if (candidate.intersects(shape)) {
                 return false;

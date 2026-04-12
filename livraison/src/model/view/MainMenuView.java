@@ -1,5 +1,11 @@
 package mvc.model.view;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.GridLayout;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -7,7 +13,9 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -19,6 +27,14 @@ import mvc.model.view.theme.ThemeManager;
 import mvc.model.view.theme.ThemeStrategyFactory;
 
 public class MainMenuView {
+
+    private static final Color RETRO_PURPLE_BG = new Color(56, 14, 92);
+    private static final Color RETRO_PURPLE_PANEL = new Color(76, 25, 120);
+    private static final Color RETRO_NEON_PINK = new Color(255, 88, 190);
+    private static final Color RETRO_TEXT = new Color(245, 232, 255);
+    private static final Color RETRO_INPUT_BG = new Color(100, 45, 150);
+    private static final Font RETRO_TITLE_FONT = new Font("Monospaced", Font.BOLD, 22);
+    private static final Font RETRO_LABEL_FONT = new Font("Monospaced", Font.BOLD, 13);
 
     public static final String STRATEGY_RANDOM = "Random Generation";
     public static final String STRATEGY_AI = "AI Player";
@@ -39,12 +55,29 @@ public class MainMenuView {
         SwingUtilities.invokeLater(() -> {
             JFrame menuFrame = new JFrame("ASI GAME");
             menuFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            menuFrame.setSize(400, 300);
+            menuFrame.setSize(460, 340);
             menuFrame.setLocationRelativeTo(null);
+            menuFrame.getContentPane().setBackground(RETRO_PURPLE_BG);
 
             JPanel panel = new JPanel();
-            panel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-            panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+            panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(RETRO_NEON_PINK, 2),
+                BorderFactory.createEmptyBorder(14, 14, 14, 14)));
+            panel.setLayout(new GridBagLayout());
+            panel.setBackground(RETRO_PURPLE_PANEL);
+
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            gbc.gridwidth = 2;
+            gbc.anchor = GridBagConstraints.WEST;
+            gbc.insets = new Insets(0, 0, 10, 0);
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+
+            JLabel titleLabel = new JLabel("RETRO GAME MENU");
+            titleLabel.setFont(RETRO_TITLE_FONT);
+            titleLabel.setForeground(RETRO_NEON_PINK);
+            panel.add(titleLabel, gbc);
 
             JLabel strategyLabel = new JLabel("Selection de strategie:");
             String[] strategies = {STRATEGY_RANDOM, STRATEGY_AI, STRATEGY_TWO_PLAYERS};
@@ -57,6 +90,13 @@ public class MainMenuView {
             JLabel themeLabel = new JLabel("Theme:");
             String[] themes = {ThemeStrategyFactory.THEME_LIGHT, ThemeStrategyFactory.THEME_DARK};
             JComboBox<String> themeComboBox = new JComboBox<>(themes);
+
+            styleRetroLabel(strategyLabel);
+            styleRetroLabel(difficultyLabel);
+            styleRetroLabel(themeLabel);
+            styleRetroCombo(strategyComboBox);
+            styleRetroCombo(difficultyComboBox);
+            styleRetroCombo(themeComboBox);
 
             StyledButtonFactory buttonFactory = new StyledButtonFactory(ThemeManager.getCurrentTheme());
             JButton startButton = buttonFactory.createPrimaryButton(" Comencer le jeu ", () -> {
@@ -80,17 +120,79 @@ public class MainMenuView {
                 menuFrame.dispose();
                 onStart.accept(new MenuSelection(level, selectedDifficulty, selectedStrategy, false, "", ""));
             });
+            startButton.setFont(new Font("Monospaced", Font.BOLD, 13));
+            startButton.setBorder(BorderFactory.createLineBorder(RETRO_NEON_PINK, 2));
 
-            panel.add(strategyLabel);
-            panel.add(strategyComboBox);
-            panel.add(difficultyLabel);
-            panel.add(difficultyComboBox);
-            panel.add(themeLabel);
-            panel.add(themeComboBox);
-            panel.add(startButton);
+            gbc.gridy++;
+            gbc.gridwidth = 1;
+            gbc.insets = new Insets(2, 0, 2, 8);
+            panel.add(strategyLabel, gbc);
+
+            gbc.gridx = 1;
+            gbc.insets = new Insets(2, 0, 2, 0);
+            panel.add(strategyComboBox, gbc);
+
+            gbc.gridx = 0;
+            gbc.gridy++;
+            gbc.insets = new Insets(2, 0, 2, 8);
+            panel.add(difficultyLabel, gbc);
+
+            gbc.gridx = 1;
+            gbc.insets = new Insets(2, 0, 2, 0);
+            panel.add(difficultyComboBox, gbc);
+
+            gbc.gridx = 0;
+            gbc.gridy++;
+            gbc.insets = new Insets(2, 0, 2, 8);
+            panel.add(themeLabel, gbc);
+
+            gbc.gridx = 1;
+            gbc.insets = new Insets(2, 0, 2, 0);
+            panel.add(themeComboBox, gbc);
+
+            gbc.gridx = 0;
+            gbc.gridy++;
+            gbc.gridwidth = 2;
+            gbc.insets = new Insets(14, 0, 0, 0);
+            gbc.anchor = GridBagConstraints.CENTER;
+            panel.add(startButton, gbc);
 
             menuFrame.add(panel);
             menuFrame.setVisible(true);
+        });
+    }
+
+    private void styleRetroLabel(JLabel label) {
+        label.setForeground(RETRO_TEXT);
+        label.setFont(RETRO_LABEL_FONT);
+    }
+
+    private void styleRetroCombo(JComboBox<String> comboBox) {
+        comboBox.setBackground(RETRO_INPUT_BG);
+        comboBox.setForeground(Color.WHITE);
+        comboBox.setFont(RETRO_LABEL_FONT);
+        comboBox.setBorder(BorderFactory.createLineBorder(RETRO_NEON_PINK, 1));
+        comboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(
+                    JList<?> list,
+                    Object value,
+                    int index,
+                    boolean isSelected,
+                    boolean cellHasFocus) {
+                JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                label.setOpaque(true);
+                label.setFont(RETRO_LABEL_FONT);
+
+                if (isSelected) {
+                    label.setBackground(RETRO_NEON_PINK);
+                    label.setForeground(new Color(38, 7, 64));
+                } else {
+                    label.setBackground(RETRO_INPUT_BG);
+                    label.setForeground(RETRO_TEXT);
+                }
+                return label;
+            }
         });
     }
 

@@ -41,6 +41,7 @@ public class GameModel extends Observable {
     private int turnsPlayed;
     private int redPlayerScore;
     private int bluePlayerScore;
+    private int turnStartCoveredArea;
     private boolean gameFinished;
     private boolean gameWon;
     private boolean magistralWin;
@@ -73,6 +74,7 @@ public class GameModel extends Observable {
         turnsPlayed = 0;
         redPlayerScore = 0;
         bluePlayerScore = 0;
+        turnStartCoveredArea = 0;
         gameFinished = false;
         gameWon = false;
         magistralWin = false;
@@ -271,7 +273,7 @@ public class GameModel extends Observable {
                 System.out.println("Level " + currentLevel + " complet! Score: " + currentScore);
                 if (twoPlayerMode) {
                     state = GameState.LEVEL_COMPLETE;
-                    int score = currentScore;
+                    int score = Math.max(0, currentScore - turnStartCoveredArea);
                     totalScore += score;
                     if (redPlayerTurn) {
                         redPlayerScore += score;
@@ -357,6 +359,7 @@ public class GameModel extends Observable {
         turnsPlayed = 0;
         redPlayerScore = 0;
         bluePlayerScore = 0;
+        turnStartCoveredArea = 0;
         redShapes.clear();
         blueShapes.clear();
         blueShapesPlacedThisLevel = 0;
@@ -368,6 +371,16 @@ public class GameModel extends Observable {
         currentGameTimeLimitMillis = TOTAL_GAME_DURATION_MILLIS;
         globalTimerStarted = false;
         twoPlayerGameStartTime = System.currentTimeMillis();
+
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (!gameFinished && twoPlayerMode) {
+                    finishTwoPlayerGameByTime();
+                }
+            }
+        }, TOTAL_GAME_DURATION_MILLIS);
+
         modelChanged("TWO_PLAYER_ENABLED");
     }
 
@@ -402,6 +415,9 @@ public class GameModel extends Observable {
     }
 
     private void finishTwoPlayerGameByTime() {
+        if (gameFinished) {
+            return;
+        }
         gameFinished = true;
         gameWon = redPlayerScore > bluePlayerScore;
         magistralWin = false;
@@ -440,13 +456,14 @@ public class GameModel extends Observable {
     private void completeTwoPlayerTurn() {
         turnsPlayed++;
         if (turnsPlayed >= MAX_TURNS_PER_PLAYER * 2) {
-            setState(GameState.GAME_OVER);
+            finishTwoPlayerGameByTime();
             System.out.println("Two player TERMINER");
             return;
         }
 
         redPlayerTurn = !redPlayerTurn;
         blueShapesPlacedThisLevel = 0;
+        turnStartCoveredArea = calculateScore();
         redShapesShownForGameEnd = false;
         state = GameState.PLACING_BLUE;
         modelChanged("TWO_PLAYER_TURN_CHANGED");
