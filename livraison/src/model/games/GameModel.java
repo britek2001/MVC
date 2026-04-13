@@ -14,9 +14,12 @@ import mvc.model.game.GameState;
 import mvc.model.view.GameView;
 import mvc.model.game.LevelConfig;
 import java.util.Map;
+import java.util.logging.Logger;
 
 
 public class GameModel extends Observable {
+
+    private static final Logger logger = Logger.getLogger(GameModel.class.getName());
 
     private static final int BLUE_SHAPES_PER_LEVEL = 4;
     private static final long TOTAL_GAME_DURATION_MILLIS = 60_000L;
@@ -52,6 +55,7 @@ public class GameModel extends Observable {
     private long currentGameTimeLimitMillis;
     private boolean globalTimerStarted;
     private TimerTask levelGameTimeoutTask;
+    private TimerTask redShapesHideTask;
     
     private static final int MAX_LEVEL = 5;
     private static final int MAX_TURNS_PER_PLAYER = 4;
@@ -87,6 +91,7 @@ public class GameModel extends Observable {
         currentGameTimeLimitMillis = TOTAL_GAME_DURATION_MILLIS;
         globalTimerStarted = false;
         levelGameTimeoutTask = null;
+        redShapesHideTask = null;
     }
 
     public boolean areRedShapesVisible() {
@@ -118,8 +123,8 @@ public class GameModel extends Observable {
     }
 
     private static final Map<Integer, LevelConfig> LEVEL_CONFIGS = Map.of(
-            1, new LevelConfig(2, 10, "Facile", "2 petits rectangles"),
-            2, new LevelConfig(3, 10, "Moyen", "3 cercles moyens"),
+            1, new LevelConfig(2, 10, "Facile", "2 formes"),
+            2, new LevelConfig(3, 10, "Moyen", "3 formes"),
             3, new LevelConfig(4, 8, "Difficile", "4 formes melangées"),
             4, new LevelConfig(5, 8, "Tres difficile", "5 polygones complexes"),
             5, new LevelConfig(6, 6, "Extreme", "6 formes qui se chevauchent")
@@ -146,12 +151,12 @@ public class GameModel extends Observable {
 
     public void generateRedShapes(int count, int panelWidth, int panelHeight) {
         if (panelWidth < this.width || panelHeight < this.height) {
-            System.out.println("Panel size petit : " + this.width + "x" + this.height);
+            logger.warning("Panel size petit : " + this.width + "x" + this.height);
             return;
         }
 
         if (generationStrategy == null) {
-            System.out.println("Pas de strategy !");
+            logger.warning("Pas de strategy !");
             return;
         }
 
@@ -160,7 +165,7 @@ public class GameModel extends Observable {
         count = Math.min(count, cfg.redShapeCount);
         startGameTimerForLevel();
 
-        System.out.println("Level: " + levelToGenerate + ", Red shapes pour generer: " + count);
+        logger.info("Level: " + levelToGenerate + ", Red shapes pour generer: " + count);
 
         if (!twoPlayerMode) {
             redShapes.clear();
@@ -170,39 +175,49 @@ public class GameModel extends Observable {
         }
         blueShapesPlacedThisLevel = 0;
         redShapesShownForGameEnd = false;
-        showRedShapes();
-        redShapesVisibleUntil = System.currentTimeMillis() + (cfg.timeSeconds * 1000L);
-        currentRedTimeLimitMillis = cfg.timeSeconds * 1000L;
+        startRedVisibilityCountdown(cfg.timeSeconds * 1000L);
 
         List<GameShape> newRedShapes = generateValidRedShapes(count, panelWidth, panelHeight);
         if (newRedShapes == null || newRedShapes.isEmpty()) {
-            System.out.println("ERROR: No shapes generated!");
+            logger.warning("ERROR: No shapes generated!");
             return;
         }
 
         redShapes.addAll(newRedShapes);
-        System.out.println("Generer " + redShapes.size() + " red shapes");
+        logger.info("Generer " + redShapes.size() + " red shapes");
         modelChanged("RED_SHAPES_GENERATED");
-
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                hideRedShapes();
-            }
-        }, cfg.timeSeconds * 1000L);
 
         nextLevel();
     }
 
+    private void startRedVisibilityCountdown(long durationMillis) {
+        if (redShapesHideTask != null) {
+            redShapesHideTask.cancel();
+            redShapesHideTask = null;
+        }
+
+        currentRedTimeLimitMillis = Math.max(0L, durationMillis);
+        redShapesVisibleUntil = System.currentTimeMillis() + currentRedTimeLimitMillis;
+        showRedShapes();
+
+        redShapesHideTask = new TimerTask() {
+            @Override
+            public void run() {
+                hideRedShapes();
+            }
+        };
+        timer.schedule(redShapesHideTask, currentRedTimeLimitMillis);
+    }
+
     public boolean canPlaceBlueShape(GameShape shape) {
         if (!isShapeWithinGameArea(shape)) {
-            System.out.println("Pas possible out of arrea ");
+            logger.info("Pas possible out of arrea ");
             return false;
         }
 
         for (GameShape red : redShapes) {
             if (shape.intersects(red)) {
-                System.out.println("Pas possible intercection de figure de couleur diferente");
+                logger.info("Pas possible intercection de figure de couleur diferente");
                 return false;
             }
         }
@@ -210,7 +225,7 @@ public class GameModel extends Observable {
         if (twoPlayerMode) {
             for (GameShape existing : blueShapes) {
                 if (shape.intersects(existing)) {
-                    System.out.println("Pas possible place shape interseccion not allowed ");
+                    logger.info("Pas possible place shape interseccion not allowed ");
                     return false;
                 }
             }
@@ -218,7 +233,7 @@ public class GameModel extends Observable {
         }
         for (GameShape blue : blueShapes) {
             if (shape.intersects(blue)) {
-                System.out.println("Pas possible place shape intersection avec un blueshape");
+                logger.info("Pas possible place shape intersection avec un blueshape");
                 return false;
             }
         }
@@ -234,78 +249,104 @@ public class GameModel extends Observable {
     }
 
     private boolean addBlueShape(GameShape shape, boolean fromAI) {
+        if (isPlacementRejected(fromAI)) {
+            return false;
+        }
+
+        shape.setColor(getCurrentDrawingColor());
+        if (!canPlaceBlueShape(shape)) {
+            return false;
+        }
+
+        blueShapes.add(shape);
+        blueShapesPlacedThisLevel++;
+        int currentScore = calculateScore();
+
+        if (!twoPlayerMode) {
+            totalScore = currentScore;
+        }
+
+        logger.info("Numero de Blue Shapes: " + getBlueShapesPlacedThisLevel() + "/" + BLUE_SHAPES_PER_LEVEL);
+
+        if (getBlueShapesPlacedThisLevel() == BLUE_SHAPES_PER_LEVEL) {
+            logger.info("Level " + currentLevel + " complet! Score: " + currentScore);
+            handleLevelCompletion(currentScore);
+        }
+
+        logger.info("Score Actuel: " + currentScore);
+        modelChanged("BLUE_SHAPE_ADDED");
+        return true;
+    }
+
+    private boolean isPlacementRejected(boolean fromAI) {
         if (gameFinished) {
-            return false;
-        }
-
-        if (twoPlayerMode && aiPlayerMode) {
-            if (redPlayerTurn && !fromAI) {
-                return false;
-            }
-            if (!redPlayerTurn && fromAI) {
-                return false;
-            }
-        }
-
-        if (twoPlayerMode) {
-            long elapsedTime = System.currentTimeMillis() - twoPlayerGameStartTime;
-            if (elapsedTime > TOTAL_GAME_DURATION_MILLIS) {
-                finishTwoPlayerGameByTime();
-                return false;
-            }
-        }
-
-        if (twoPlayerMode) {
-            shape.setColor(getCurrentDrawingColor());
-        }
-        
-        if (getBlueShapesPlacedThisLevel() >= BLUE_SHAPES_PER_LEVEL) {
-            modelChanged("BLUE_LIMIT_REACHED");
-            return false;
-        }
-
-        if ( canPlaceBlueShape(shape)) {
-            shape.setColor(getCurrentDrawingColor());
-            blueShapes.add(shape);
-            blueShapesPlacedThisLevel++;
-            int currentScore = calculateScore();
-            if (!twoPlayerMode) {
-                totalScore = currentScore;
-            }
-            System.out.println("Numero de Blue Shapes: " + getBlueShapesPlacedThisLevel() + "/" + BLUE_SHAPES_PER_LEVEL);
-            if (getBlueShapesPlacedThisLevel() == BLUE_SHAPES_PER_LEVEL) {
-                System.out.println("Level " + currentLevel + " complet! Score: " + currentScore);
-                if (twoPlayerMode) {
-                    state = GameState.LEVEL_COMPLETE;
-                    int score = Math.max(0, currentScore - turnStartCoveredArea);
-                    totalScore += score;
-                    if (redPlayerTurn) {
-                        redPlayerScore += score;
-                    } else {
-                        bluePlayerScore += score;
-                    }
-                    completeTwoPlayerTurn();
-                    modelChanged("LEVEL_COMPLETE");
-                } else {
-                    recordCurrentLevelScore();
-                    if (!globalTimerStarted || generationStrategy == null) {
-                        finishGame(true);
-                    } else {
-                        if (currentLevel >= MAX_LEVEL) {
-                            finishGame(true);
-                        } else {
-                            int nextLevel = currentLevel + 1;
-                            LevelConfig cfg = getLevelConfig(nextLevel);
-                            generateRedShapes(cfg.redShapeCount, width, height);
-                        }
-                    }
-                }
-            }
-            System.out.println("Score Actuel: " + currentScore);
-            modelChanged("BLUE_SHAPE_ADDED");
             return true;
         }
+
+        if (isInvalidAITurn(fromAI)) {
+            return true;
+        }
+
+        if (isTwoPlayerTimeExpired()) {
+            finishTwoPlayerGameByTime();
+            return true;
+        }
+
+        if (getBlueShapesPlacedThisLevel() >= BLUE_SHAPES_PER_LEVEL) {
+            modelChanged("BLUE_LIMIT_REACHED");
+            return true;
+        }
+
         return false;
+    }
+
+    private boolean isInvalidAITurn(boolean fromAI) {
+        if (!(twoPlayerMode && aiPlayerMode)) {
+            return false;
+        }
+        return (redPlayerTurn && !fromAI) || (!redPlayerTurn && fromAI);
+    }
+
+    private boolean isTwoPlayerTimeExpired() {
+        if (!twoPlayerMode) {
+            return false;
+        }
+        long elapsedTime = System.currentTimeMillis() - twoPlayerGameStartTime;
+        return elapsedTime > TOTAL_GAME_DURATION_MILLIS;
+    }
+
+    private void handleLevelCompletion(int currentScore) {
+        if (twoPlayerMode) {
+            handleTwoPlayerLevelCompletion(currentScore);
+            return;
+        }
+        handleSinglePlayerLevelCompletion();
+    }
+
+    private void handleTwoPlayerLevelCompletion(int currentScore) {
+        state = GameState.LEVEL_COMPLETE;
+        int score = Math.max(0, currentScore - turnStartCoveredArea);
+        totalScore += score;
+        if (redPlayerTurn) {
+            redPlayerScore += score;
+        } else {
+            bluePlayerScore += score;
+        }
+        completeTwoPlayerTurn();
+        modelChanged("LEVEL_COMPLETE");
+    }
+
+    private void handleSinglePlayerLevelCompletion() {
+        recordCurrentLevelScore();
+
+        if (!globalTimerStarted || generationStrategy == null || currentLevel >= MAX_LEVEL) {
+            finishGame(true);
+            return;
+        }
+
+        int nextLevel = currentLevel + 1;
+        LevelConfig cfg = getLevelConfig(nextLevel);
+        generateRedShapes(cfg.redShapeCount, width, height);
     }
 
     public int calculateScore() {
@@ -428,6 +469,10 @@ public class GameModel extends Observable {
 
     public void disableTwoPlayerMode() {
         twoPlayerMode = false;
+        if (redShapesHideTask != null) {
+            redShapesHideTask.cancel();
+            redShapesHideTask = null;
+        }
         gameFinished = false;
         gameWon = false;
         magistralWin = false;
@@ -443,6 +488,10 @@ public class GameModel extends Observable {
         if (levelGameTimeoutTask != null) {
             levelGameTimeoutTask.cancel();
             levelGameTimeoutTask = null;
+        }
+        if (redShapesHideTask != null) {
+            redShapesHideTask.cancel();
+            redShapesHideTask = null;
         }
         if (!twoPlayerMode) {
             recordCurrentLevelScore();
@@ -468,17 +517,21 @@ public class GameModel extends Observable {
         if (gameFinished) {
             return;
         }
+        if (redShapesHideTask != null) {
+            redShapesHideTask.cancel();
+            redShapesHideTask = null;
+        }
         gameFinished = true;
         gameWon = redPlayerScore > bluePlayerScore;
         magistralWin = false;
         finalCoveredArea = Math.max(redPlayerScore, bluePlayerScore);
         totalScore = redPlayerScore + bluePlayerScore;
         state = GameState.GAME_OVER;
-        System.out.println("Temps écoulé! Score Rouge: " + redPlayerScore + " | Score Bleu: " + bluePlayerScore);
+        logger.info("Temps écoulé! Score Rouge: " + redPlayerScore + " | Score Bleu: " + bluePlayerScore);
         if (gameWon) {
-            System.out.println("Le Joueur Rouge gagne!");
+            logger.info("Le Joueur Rouge gagne!");
         } else {
-            System.out.println("Le Joueur Bleu gagne!");
+            logger.info("Le Joueur Bleu gagne!");
         }
         modelChanged("GAME_OVER");
     }
@@ -507,7 +560,7 @@ public class GameModel extends Observable {
         turnsPlayed++;
         if (turnsPlayed >= MAX_TURNS_PER_PLAYER * 2) {
             finishTwoPlayerGameByTime();
-            System.out.println("Two player TERMINER");
+            logger.info("Two player TERMINER");
             return;
         }
 
@@ -515,7 +568,13 @@ public class GameModel extends Observable {
         blueShapesPlacedThisLevel = 0;
         turnStartCoveredArea = calculateScore();
         redShapesShownForGameEnd = false;
-        state = GameState.PLACING_BLUE;
+
+        if (currentRedTimeLimitMillis > 0) {
+            startRedVisibilityCountdown(currentRedTimeLimitMillis);
+        } else {
+            state = GameState.PLACING_BLUE;
+        }
+
         modelChanged("TWO_PLAYER_TURN_CHANGED");
     }
     
@@ -702,7 +761,7 @@ public class GameModel extends Observable {
         }
 
         if (validShapes.size() < count) {
-            System.out.println("ATTENTION : " + validShapes.size() + "/" + count + " formes rouges générées.");
+            logger.warning("ATTENTION : " + validShapes.size() + "/" + count + " formes rouges générées.");
         }
 
         return validShapes;
@@ -714,14 +773,23 @@ public class GameModel extends Observable {
     }
     
     public void getStatistics () {
-        System.out.printf("========== GAME STATISTICS  %s ==========%n", currentLevel);
-        System.out.println("Total Score: " + totalScore);
-        System.out.println("Game State: " + state);
-        System.out.println("Red Shapes Visible: " + areRedShapesVisible());
-        System.out.println("Red Visible Time: " + redShapesVisibleUntil);
-        System.out.println("Reds: " + getRedShapes().size());
-        System.out.println("Blues: " + getBlueShapes().size());
-        System.out.println("Blue placed this level: " + getBlueShapesPlacedThisLevel() + "/" + getBlueShapesPerLevel());
-        System.out.println();
+        logger.info(String.format(
+            "========== GAME STATISTICS %s ==========%n"
+                + "Total Score: %s%n"
+                + "Game State: %s%n"
+                + "Red Shapes Visible: %s%n"
+                + "Red Visible Time: %s%n"
+                + "Reds: %s%n"
+                + "Blues: %s%n"
+                + "Blue placed this level: %s/%s%n",
+            currentLevel,
+            totalScore,
+            state,
+            areRedShapesVisible(),
+            redShapesVisibleUntil,
+            getRedShapes().size(),
+            getBlueShapes().size(),
+            getBlueShapesPlacedThisLevel(),
+            getBlueShapesPerLevel()));
     }
 }

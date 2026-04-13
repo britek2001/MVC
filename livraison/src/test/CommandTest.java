@@ -154,4 +154,36 @@ class CommandTest {
         assertEquals(originalHeight, testRectangle.height, 0.01);
     }
 
+    @Test
+    @DisplayName("testResizeChainRejectsIntersectionAfterResize")
+    void testResizeChainRejectsIntersectionAfterResize() {
+        Circle blue = new Circle(100, 100, 20, Color.BLUE);
+        Circle red = new Circle(160, 100, 20, Color.RED);
+        model.getRedShapes().add(red);
+        model.addBlueShape(blue);
+
+        double originalRadius = blue.getRadius();
+        ResizeShapeCommand cmd = new ResizeShapeCommand(model, blue, 2.0, 0);
+
+        cmd.execut();
+
+        assertEquals(originalRadius, blue.getRadius(), 0.01);
+    }
+
+    @Test
+    @DisplayName("testResizeChainRejectsOutOfGameAreaAfterResize")
+    void testResizeChainRejectsOutOfGameAreaAfterResize() {
+        Rectangle nearEdge = new Rectangle(760, 100, 30, 30, Color.BLUE);
+        model.addBlueShape(nearEdge);
+
+        double originalWidth = nearEdge.width;
+        double originalHeight = nearEdge.height;
+        ResizeShapeCommand cmd = new ResizeShapeCommand(model, nearEdge, 2.0, 0);
+
+        cmd.execut();
+
+        assertEquals(originalWidth, nearEdge.width, 0.01);
+        assertEquals(originalHeight, nearEdge.height, 0.01);
+    }
+
 }

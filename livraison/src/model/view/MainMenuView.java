@@ -2,6 +2,7 @@ package mvc.model.view;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -20,11 +21,11 @@ import javax.swing.JList;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.JDialog;
 import mvc.model.view.theme.StyledButtonFactory;
 import mvc.model.view.theme.ThemeManager;
 import mvc.model.view.theme.ThemeStrategyFactory;
@@ -36,8 +37,9 @@ public class MainMenuView {
     private static final Color RETRO_NEON_PINK = new Color(255, 88, 190);
     private static final Color RETRO_TEXT = new Color(245, 232, 255);
     private static final Color RETRO_INPUT_BG = new Color(100, 45, 150);
-    private static final Font RETRO_TITLE_FONT = new Font("Monospaced", Font.BOLD, 22);
-    private static final Font RETRO_LABEL_FONT = new Font("Monospaced", Font.BOLD, 13);
+    private static final String FONT_FAMILY_MONOSPACED = "Monospaced";
+    private static final Font RETRO_TITLE_FONT = new Font(FONT_FAMILY_MONOSPACED, Font.BOLD, 22);
+    private static final Font RETRO_LABEL_FONT = new Font(FONT_FAMILY_MONOSPACED, Font.BOLD, 13);
 
     public static final String STRATEGY_RANDOM = "Random Generation";
     public static final String STRATEGY_AI = "AI Player";
@@ -137,8 +139,7 @@ public class MainMenuView {
                 menuFrame.dispose();
                 onStart.accept(new MenuSelection(level, selectedDifficulty, selectedStrategy, false, "", ""));
             });
-            startButton.setFont(new Font("Monospaced", Font.BOLD, 13));
-            startButton.setBorder(BorderFactory.createLineBorder(RETRO_NEON_PINK, 2));
+            startButton.setFont(new Font(FONT_FAMILY_MONOSPACED, Font.BOLD, 11));
 
             gbc.gridy++;
             gbc.gridwidth = 1;
@@ -225,20 +226,60 @@ public class MainMenuView {
         JTextField redPlayerField = new JTextField(15);
         JTextField bluePlayerField = new JTextField(15);
 
+        redPlayerField.setBackground(RETRO_INPUT_BG);
+        redPlayerField.setForeground(RETRO_TEXT);
+        redPlayerField.setCaretColor(RETRO_TEXT);
+        redPlayerField.setBorder(BorderFactory.createLineBorder(RETRO_NEON_PINK, 1));
+
+        bluePlayerField.setBackground(RETRO_INPUT_BG);
+        bluePlayerField.setForeground(RETRO_TEXT);
+        bluePlayerField.setCaretColor(RETRO_TEXT);
+        bluePlayerField.setBorder(BorderFactory.createLineBorder(RETRO_NEON_PINK, 1));
+
         JPanel form = new JPanel(new GridLayout(0, 1, 6, 6));
-        form.add(new JLabel("Nom du joueur rouge:"));
+        form.setBackground(RETRO_PURPLE_PANEL);
+
+        JLabel redLabel = new JLabel("Nom du joueur rouge:");
+        redLabel.setForeground(RETRO_TEXT);
+        redLabel.setFont(RETRO_LABEL_FONT);
+
+        JLabel blueLabel = new JLabel("Nom du joueur bleu:");
+        blueLabel.setForeground(RETRO_TEXT);
+        blueLabel.setFont(RETRO_LABEL_FONT);
+
+        form.add(redLabel);
         form.add(redPlayerField);
-        form.add(new JLabel("Nom du joueur bleu:"));
+        form.add(blueLabel);
         form.add(bluePlayerField);
 
-        int result = JOptionPane.showConfirmDialog(
-                parentFrame,
-                form,
-                "Two Players Setup",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE);
+        JPanel content = new JPanel(new BorderLayout(10, 10));
+        content.setBackground(RETRO_PURPLE_PANEL);
+        content.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        content.add(form, BorderLayout.CENTER);
 
-        if (result != JOptionPane.OK_OPTION) {
+        StyledButtonFactory buttonFactory = new StyledButtonFactory(ThemeManager.getCurrentTheme());
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        actions.setBackground(RETRO_PURPLE_PANEL);
+
+        final boolean[] confirmed = {false};
+        JDialog dialog = new JDialog(parentFrame, "Two Players Setup", true);
+
+        JButton cancelButton = buttonFactory.createPrimaryButton("Annuler", dialog::dispose);
+        JButton okButton = buttonFactory.createPrimaryButton("OK", () -> {
+            confirmed[0] = true;
+            dialog.dispose();
+        });
+
+        actions.add(cancelButton);
+        actions.add(okButton);
+        content.add(actions, BorderLayout.SOUTH);
+
+        dialog.setContentPane(content);
+        dialog.pack();
+        dialog.setLocationRelativeTo(parentFrame);
+        dialog.setVisible(true);
+
+        if (!confirmed[0]) {
             return null;
         }
 

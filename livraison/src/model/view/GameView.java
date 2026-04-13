@@ -5,12 +5,13 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Random;
+import java.util.function.Supplier;
 import java.awt.Window;
 import mvc.model.commands.CreateShapeCommand;
 import mvc.model.commands.DeleteShapeCommand;
@@ -18,16 +19,16 @@ import mvc.model.commands.Command;
 import mvc.model.controller.ControleurSouris;
 import mvc.model.controller.EtatCreationRectangle;
 import mvc.model.controller.EtatCreationCercle;
+import mvc.model.controller.EtatInteraction;
 import mvc.model.game.GameModel;
 import mvc.model.game.GameState;
+import mvc.model.game.turn.PlayerTurnState;
+import mvc.model.game.turn.TurnCoordinator;
 import mvc.model.shapes.GameShape;
 import mvc.model.shapes.Rectangle;
 import mvc.model.shapes.Circle;
 import javax.swing.*;
 import java.util.ArrayList;
-import mvc.model.strategies.ShapeGenerationStrategy;
-import mvc.model.strategies.ClickPlacementStrategy;
-import mvc.model.strategies.RandomGenerationStrategy;
 import mvc.model.strategies.AIPlayerStrategy;
 
 public class GameView extends JPanel implements Observer {
@@ -37,7 +38,6 @@ public class GameView extends JPanel implements Observer {
     private final GameModel model;
     private final MouseAdapter controller;
     private final Runnable onEndGame;
-    private final Random random = new Random();
     private final GamePainter painter = new GamePainter();
     private final CommandHManager historyManager = new CommandHManager();
     private final Timer hudRefreshTimer;
@@ -51,16 +51,22 @@ public class GameView extends JPanel implements Observer {
     private GameShape aiPreviewShape;
     private java.util.List<GameShape> pendingAIShapes;
     private int pendingAIShapeIndex;
+    private final TurnCoordinator turnCoordinator;
     private static final int AI_ANIMATION_STEPS = 12;
     private static final int AI_ANIMATION_FRAME_MILLIS = 35;
     private static final int AI_SHAPE_DELAY_MILLIS = 140;
 
     public GameView(GameModel model, MouseAdapter controller, Runnable onEndGame, AIPlayerStrategy aiStrategy) {
+        this(model, controller, onEndGame, aiStrategy, null);
+    }
+
+    public GameView(GameModel model, MouseAdapter controller, Runnable onEndGame, AIPlayerStrategy aiStrategy, TurnCoordinator turnCoordinator) {
         
         this.model = model;
         this.controller = controller;
         this.onEndGame = onEndGame;
         this.aiStrategy = aiStrategy;
+        this.turnCoordinator = turnCoordinator;
         this.model.setGameAreaTopInset(GAME_AREA_TOP_INSET);
         gameResultShown = false;
         aiTurnInProgress = false;
@@ -129,6 +135,7 @@ public class GameView extends JPanel implements Observer {
 
     @Override
     public void update(Observable o, Object g) {
+        updateTurnCoordinator(g);
         if (gameResultShown) {
             return;
         }
@@ -146,6 +153,43 @@ public class GameView extends JPanel implements Observer {
                 }
             } else {
                 aiStrategy.switchToHumanTurn();
+            }
+        }
+    }
+
+    private void updateTurnCoordinator(Object event) {
+        if (turnCoordinator == null) {
+            return;
+        }
+
+        String eventName = String.valueOf(event);
+
+        if ("GAME_OVER".equals(eventName)) {
+            turnCoordinator.abortTurn();
+            return;
+        }
+
+        if ("BLUE_SHAPE_ADDED".equals(eventName)) {
+            turnCoordinator.completeAction();
+            return;
+        }
+
+        if (model.isGameFinished()) {
+            turnCoordinator.abortTurn();
+            return;
+        }
+
+        if ("TWO_PLAYER_ENABLED".equals(eventName)
+                || "TWO_PLAYER_TURN_CHANGED".equals(eventName)
+                || "RED_SHAPES_GENERATED".equals(eventName)
+                || "LEVEL_CHANGED".equals(eventName)
+                || "STATE_CHANGED".equals(eventName)
+                || "GAME_STATE_CHANGED".equals(eventName)) {
+            if (model.isTwoPlayerMode()) {
+                turnCoordinator.startTurn(model.isAIPlayerMode() && model.isRedPlayerTurn()
+                        ? PlayerTurnState.AI
+                        : PlayerTurnState.HUMAN_GUI);
+                turnCoordinator.requestAction();
             }
         }
     }
@@ -313,25 +357,34 @@ public class GameView extends JPanel implements Observer {
         gameResultShown = true;
 
         SwingUtilities.invokeLater(() -> {
+            Color popupBg = new Color(76, 25, 120);
+            Color popupText = new Color(245, 232, 255);
+            Color popupAccent = new Color(255, 88, 190);
+
             Window owner = SwingUtilities.getWindowAncestor(this);
             JDialog dialog = new JDialog(owner, "Resultat de la partie", Dialog.ModalityType.APPLICATION_MODAL);
             dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             dialog.setLayout(new BorderLayout(12, 12));
+            dialog.getContentPane().setBackground(popupBg);
 
             JPanel content = new JPanel();
             content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
             content.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+            content.setBackground(popupBg);
 
             if (model.isTwoPlayerMode()) {
                 String winnerName = model.isGameWon() ? model.getRedPlayerName() : model.getBluePlayerName();
                 JLabel winnerLabel = new JLabel("Gagnant: " + winnerName);
                 winnerLabel.setAlignmentX(LEFT_ALIGNMENT);
+                stylePopupLabel(winnerLabel, popupText);
                 
                 JLabel redScoreLabel = new JLabel(model.getRedPlayerName() + " score: " + model.getRedPlayerScore());
                 redScoreLabel.setAlignmentX(LEFT_ALIGNMENT);
+                stylePopupLabel(redScoreLabel, popupText);
                 
                 JLabel blueScoreLabel = new JLabel(model.getBluePlayerName() + " score: " + model.getBluePlayerScore());
                 blueScoreLabel.setAlignmentX(LEFT_ALIGNMENT);
+                stylePopupLabel(blueScoreLabel, popupText);
 
                 content.add(winnerLabel);
                 content.add(Box.createVerticalStrut(8));
@@ -341,21 +394,19 @@ public class GameView extends JPanel implements Observer {
             } else {
                 JLabel resultLabel = new JLabel(model.isGameWon() ? "Victoire !" : "Defaite !");
                 resultLabel.setAlignmentX(LEFT_ALIGNMENT);
-                JLabel levelScoreLabel = new JLabel("Score niveau " + model.getLevel() + ": " + model.getScoreForLevel(model.getLevel()));
-                levelScoreLabel.setAlignmentX(LEFT_ALIGNMENT);
-                JLabel scoreLabel = new JLabel("Score total cumulé: " + model.getFinalCoveredArea());
+                stylePopupLabel(resultLabel, popupText);
+                JLabel scoreLabel = new JLabel("Score = espace couvert: " + model.getFinalCoveredArea());
                 scoreLabel.setAlignmentX(LEFT_ALIGNMENT);
+                stylePopupLabel(scoreLabel, popupText);
                 JLabel shapesLabel = new JLabel("Formes posées: " + model.getBlueShapesPlacedThisLevel() + "/" + model.getBlueShapesPerLevel());
                 shapesLabel.setAlignmentX(LEFT_ALIGNMENT);
-                JLabel historyLabel = new JLabel("Historique niveaux: " + model.getLevelScores());
-                historyLabel.setAlignmentX(LEFT_ALIGNMENT);
+                stylePopupLabel(shapesLabel, popupText);
                 JLabel magistralLabel = new JLabel("VICTOIRE MAGISTRAL");
                 magistralLabel.setAlignmentX(LEFT_ALIGNMENT);
+                stylePopupLabel(magistralLabel, popupAccent);
 
                 content.add(resultLabel);
                 content.add(Box.createVerticalStrut(8));
-                content.add(levelScoreLabel);
-                content.add(Box.createVerticalStrut(4));
                 if (model.isMagistralWin()) {
                     content.add(magistralLabel);
                     content.add(Box.createVerticalStrut(4));
@@ -364,13 +415,13 @@ public class GameView extends JPanel implements Observer {
                     content.add(Box.createVerticalStrut(4));
                 }
                 content.add(shapesLabel);
-                content.add(Box.createVerticalStrut(4));
-                content.add(historyLabel);
             }
 
             JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            buttons.setBackground(popupBg);
             if (model.canStartNextLevel()) {
                 JButton nextLevelButton = new JButton("Niveau supérieur");
+                stylePopupButton(nextLevelButton, popupAccent, popupText);
                 nextLevelButton.addActionListener(evt -> {
                     dialog.dispose();
                     boolean started = model.startNextLevel();
@@ -384,13 +435,18 @@ public class GameView extends JPanel implements Observer {
             }
 
             JButton returnButton = new JButton("Retourner");
+            stylePopupButton(returnButton, new Color(100, 45, 150), popupText);
             returnButton.addActionListener(evt -> {
                 dialog.dispose();
                 onEndGame.run();
             });
 
             JButton exitButton = new JButton("Exit");
-            exitButton.addActionListener(evt -> dialog.dispose());
+            stylePopupButton(exitButton, new Color(100, 45, 150), popupText);
+            exitButton.addActionListener(evt -> {
+                dialog.dispose();
+                onEndGame.run();
+            });
 
             buttons.add(returnButton);
             buttons.add(exitButton);
@@ -402,6 +458,18 @@ public class GameView extends JPanel implements Observer {
             dialog.setVisible(true);
 
         });
+    }
+
+    private void stylePopupLabel(JLabel label, Color textColor) {
+        label.setForeground(textColor);
+        label.setFont(new Font("Monospaced", Font.BOLD, 13));
+    }
+
+    private void stylePopupButton(JButton button, Color background, Color foreground) {
+        button.setBackground(background);
+        button.setForeground(foreground);
+        button.setFocusPainted(false);
+        button.setFont(new Font("Monospaced", Font.BOLD, 11));
     }
 
     private void handleSelection(MouseEvent e) {
@@ -432,9 +500,18 @@ public class GameView extends JPanel implements Observer {
                 this::activateCircleCreation,
                 this::deleteSelectedShape,
                 this::undoLastCommand,
-            this::redoLastCommand,
-            this::completeGameAndExit);
+                this::redoLastCommand,
+                this::completeGameAndExit,
+                turnCoordinator != null ? this::validateCurrentTurn : null);
         add(controls, BorderLayout.NORTH);
+    }
+
+    private void validateCurrentTurn() {
+        if (turnCoordinator == null) {
+            return;
+        }
+        turnCoordinator.completeAction();
+        turnCoordinator.completeTurn();
     }
 
     private void completeGameAndExit() {
@@ -449,40 +526,14 @@ public class GameView extends JPanel implements Observer {
         if (isInputBlocked()) {
             return;
         }
-        if (controller instanceof ControleurSouris) {
-            ((ControleurSouris) controller).changerEtat(new EtatCreationRectangle(model));
-            setFocusable(true);
-            requestFocus();
-        }
+        changeCreationState(new EtatCreationRectangle(model));
     }
 
     private void activateCircleCreation() {
         if (isInputBlocked()) {
             return;
         }
-        if (controller instanceof ControleurSouris) {
-            ((ControleurSouris) controller).changerEtat(new EtatCreationCercle(model));
-            setFocusable(true);
-            requestFocus();
-        }
-    }
-
-    private void createRandomRectangle() {
-
-        double width = 40 + random.nextInt(80);
-        double height = 40 + random.nextInt(80);
-
-        int panelWidth = Math.max(getWidth(), 900);
-        int panelHeight = Math.max(getHeight(), 700);
-
-        double x = 20 + random.nextInt(Math.max(1, panelWidth - 160));
-        double y = 20 + random.nextInt(Math.max(1, panelHeight - 220));
-
-        Rectangle rect = new Rectangle(x, y, width, height, Color.BLUE);
-        executeCommand(new CreateShapeCommand(model, rect));
-        selectedShape = rect;
-        repaint();
-
+        changeCreationState(new EtatCreationCercle(model));
     }
 
     private void deleteSelectedShape() {
@@ -516,48 +567,34 @@ public class GameView extends JPanel implements Observer {
         if (isInputBlocked()) {
             return;
         }
-
-        if (controller instanceof ControleurSouris) {
-            boolean undone = ((ControleurSouris) controller).undoLastCommand();
-            
-            if (undone) {
-                model.modelChanged("UNDO");
-                repaint();
-                return;
-            }
-        }
-
-        if (!historyManager.undo()) {
-            return;
-        }
-
-        model.modelChanged("UNDO");
-        repaint();
-
+        applyHistoryAction("UNDO",
+                () -> controller instanceof ControleurSouris && ((ControleurSouris) controller).undoLastCommand(),
+                historyManager::undo);
     }
 
     private void redoLastCommand() {
         if (isInputBlocked()) {
             return;
         }
-        
-        if (controller instanceof ControleurSouris) {
-            boolean redone = ((ControleurSouris) controller).redoLastCommand();
-        
-            if (redone) {
-                model.modelChanged("REDO");
-                repaint();
-                return;
-            }
-        
-        }
+        applyHistoryAction("REDO",
+                () -> controller instanceof ControleurSouris && ((ControleurSouris) controller).redoLastCommand(),
+                historyManager::redo);
+    }
 
-        if (!historyManager.redo()) {
+    private void applyHistoryAction(String eventName, Supplier<Boolean> controllerAction, Supplier<Boolean> historyAction) {
+        if (controllerAction.get() || historyAction.get()) {
+            model.modelChanged(eventName);
+            repaint();
+        }
+    }
+
+    private void changeCreationState(EtatInteraction newState) {
+        if (!(controller instanceof ControleurSouris)) {
             return;
         }
-
-        model.modelChanged("REDO");
-        repaint();
+        ((ControleurSouris) controller).changerEtat(newState);
+        setFocusable(true);
+        requestFocus();
     }
 
     private GameShape getTargetShape() {
@@ -588,14 +625,16 @@ public class GameView extends JPanel implements Observer {
     }
 
     public void createRectangle(Rectangle rect) {
-        executeCommand(new CreateShapeCommand(model, rect));
-        selectedShape = rect;
-        repaint();
+        createShape(rect);
     }
 
     public void createCircle(Circle circle) {
-        executeCommand(new CreateShapeCommand(model, circle));
-        selectedShape = circle;
+        createShape(circle);
+    }
+
+    private void createShape(GameShape shape) {
+        executeCommand(new CreateShapeCommand(model, shape));
+        selectedShape = shape;
         repaint();
     }
 

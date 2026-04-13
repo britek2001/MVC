@@ -1,12 +1,18 @@
 package mvc;
 import mvc.model.game.LevelConfig;
+import mvc.model.game.ai.AIPlayPhase;
+import mvc.model.game.flow.GameFlowBuilder;
+import mvc.model.game.flow.ShowObstaclesPhase;
+import mvc.model.game.flow.PlayerPlayPhase;
+import mvc.model.game.flow.CalculateScorePhase;
 import mvc.model.commands.*;
 import mvc.model.controller.ControleurSouris;
 import mvc.model.controller.EtatSelection;
 import mvc.model.shapes.GameShape;
 import mvc.model.game.GameModel;
+import mvc.model.game.turn.TurnCoordinator;
+import mvc.model.game.turn.PlayerTurnState;
 import mvc.model.strategies.ShapeGenerationStrategy;
-import mvc.model.strategies.ClickPlacementStrategy;
 import mvc.model.strategies.AIPlayerStrategy;
 import mvc.model.strategies.RandomGenerationStrategy;
 import mvc.model.view.GameView;
@@ -15,8 +21,10 @@ import mvc.model.view.GameTutorialView;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class Main {
+    private static final Logger logger = Logger.getLogger(Main.class.getName());
     private static final int WINDOW_WIDTH = 1180;
     private static final int WINDOW_HEIGHT = 890;
     private static final int INFO_PANEL_WIDTH = 400;
@@ -45,26 +53,26 @@ public class Main {
             if (selection.isTwoPlayers()) {
                 game.enableTwoPlayerMode(selection.redPlayerName(), selection.bluePlayerName());
                 game.setAIPlayerMode(false);
-                strategy = new ClickPlacementStrategy();
+                strategy = new RandomGenerationStrategy();
                 game.setGenerationStrategy(strategy);
-                System.out.println("Strategy: Two Players");
-                System.out.println("Jouer Red: " + game.getRedPlayerName());
-                System.out.println("Jouer Blue: " + game.getBluePlayerName());
+                logger.info("Strategy: Two Players");
+                logger.info("Jouer Red: " + game.getRedPlayerName());
+                logger.info("Jouer Blue: " + game.getBluePlayerName());
             } else if (MainMenuView.STRATEGY_AI.equals(selection.strategyLabel())) {
                 game.enableTwoPlayerMode("IA", "Humain");
                 game.setAIPlayerMode(true);
                 game.setRedPlayerTurn(false);
                 strategy = new AIPlayerStrategy();
-                game.setGenerationStrategy(new ClickPlacementStrategy());
-                System.out.println("Strategy: AI Player");
-                System.out.println("Mode: Alternance Humain (Bleu) vs IA (Rouge)");
+                game.setGenerationStrategy(new RandomGenerationStrategy());
+                logger.info("Strategy: AI Player");
+                logger.info("Mode: Alternance Humain (Bleu) vs IA (Rouge)");
             } else {
                 strategy = new RandomGenerationStrategy();
                 game.disableTwoPlayerMode();
                 game.setAIPlayerMode(false);
                 game.setGenerationStrategy(strategy);
-                System.out.println("Strategy: Random Generation");
-                System.out.println("Difficulte: " + selection.difficultyLabel());
+                logger.info("Strategy: Random Generation");
+                logger.info("Difficulte: " + selection.difficultyLabel());
             }
 
             LevelConfig config = game.getLevelConfig(selection.level());
@@ -76,17 +84,33 @@ public class Main {
     private static void startGame(GameModel game, ShapeGenerationStrategy strategy, String strategyLabel, LevelConfig config) {
         SwingUtilities.invokeLater(() -> {
             ControleurSouris controller = new ControleurSouris(new EtatSelection(game));
+            TurnCoordinator turnCoordinator = new TurnCoordinator();
             JFrame frame = new JFrame("Jeu Rectangle et Cercle " + strategy.getStrategyName());
             AIPlayerStrategy aiStrategy = (strategy instanceof AIPlayerStrategy) ? (AIPlayerStrategy) strategy : null;
             GameView view = new GameView(game, controller, () -> {
                 frame.dispose();
                 showMenu(new GameModel());
-            }, aiStrategy);
+            }, aiStrategy, turnCoordinator);
             frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             frame.setContentPane(view);
             frame.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
+
+            if (MainMenuView.STRATEGY_TWO_PLAYERS.equals(strategyLabel)) {
+                Thread turnWaitThread = new Thread(() -> {
+                    try {
+                        while (!game.isGameFinished()) {
+                            turnCoordinator.awaitState(PlayerTurnState.HUMAN_GUI);
+                            turnCoordinator.awaitTurnCompletion();
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }, "turn-wait-thread");
+                turnWaitThread.setDaemon(true);
+                turnWaitThread.start();
+            }
 
             SwingUtilities.invokeLater(() -> {
                 int realGameAreaWidth = Math.max(1, view.getWidth() - INFO_PANEL_WIDTH);
@@ -94,14 +118,35 @@ public class Main {
                 game.setGameAreaSize(realGameAreaWidth, realGameAreaHeight);
 
                 if (MainMenuView.STRATEGY_RANDOM.equals(strategyLabel)) {
+                    logger.info("Lancement variante simple (" + config.timeSeconds + " secondes visibles)");
                     game.generateRedShapes(config.redShapeCount, realGameAreaWidth, realGameAreaHeight);
-                    System.out.println("Temps  pour definir les formes: " + config.timeSeconds + " secondes");
+                    GameFlowBuilder flow = GameFlowBuilder.createDefaultFlow();
+                    flow.executeFlow(game);
+                    logger.info("Score final: " + game.getTotalScore());
                 } else if (MainMenuView.STRATEGY_TWO_PLAYERS.equals(strategyLabel)) {
-                    game.setGenerationStrategy(new RandomGenerationStrategy());
+                    logger.info("Lancement variante avec mémorisation (" + config.timeSeconds + " secondes)");
                     game.generateRedShapes(config.redShapeCount, realGameAreaWidth, realGameAreaHeight);
-                    System.out.println("Two Players: generation initiale de " + config.redShapeCount + " formes rouges");
+                    GameFlowBuilder flow = GameFlowBuilder.createVariantWithWait(config.timeSeconds * 1000L);
+                    flow.executeFlow(game);
+                    logger.info("Score final: " + game.getTotalScore());
+                } else if (MainMenuView.STRATEGY_AI.equals(strategyLabel)) {
+                    logger.info("Lancement variante IA (Intelligence Artificielle)");
+                    game.generateRedShapes(config.redShapeCount, realGameAreaWidth, realGameAreaHeight);
+                    // Provide game model context to AI strategy
+                    if (aiStrategy != null) {
+                        aiStrategy.setGameModel(game);
+                        logger.info("AI: GameModel context provided to AI strategy");
+                    }
+                    GameFlowBuilder flow = new GameFlowBuilder()
+                        .addPhase(new ShowObstaclesPhase())
+                        .addPhase(new AIPlayPhase())
+                        .addPhase(new PlayerPlayPhase())
+                        .addPhase(new CalculateScorePhase());
+                        
+                    flow.executeFlow(game);
+                    logger.info("Score final: " + game.getTotalScore());
                 } else {
-                    System.out.println("Mode " + strategyLabel + ": pas de generation automatique de formes");
+                    logger.info("Mode " + strategyLabel + ": pas de generation automatique de formes");
                 }
             });
         });

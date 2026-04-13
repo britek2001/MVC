@@ -1,13 +1,15 @@
 package mvc.model.commands;
-
 import mvc.model.game.GameModel;
 import mvc.model.shapes.GameShape;
+import java.util.logging.Logger;
 
 public class ResizeShapeCommand implements Command {
+    private static final Logger logger = Logger.getLogger(ResizeShapeCommand.class.getName());
     private GameModel model;
     private GameShape shape;
     private double oldX, oldY;
     private double newX, newY;
+    private ResizeValidator validator;
 
     public ResizeShapeCommand(GameModel model, GameShape shape, double newX, double newY) {
         this.model = model;
@@ -16,18 +18,24 @@ public class ResizeShapeCommand implements Command {
         this.oldY = shape.getY();
         this.newX = newX;
         this.newY = newY;
+        this.validator = buildValidationChain();
+    }
+
+    private ResizeValidator buildValidationChain() {
+        ResizeValidator first = new ValidateResizeFactorValidator();
+        ResizeValidator second = first.setNext(new ValidateIntersectionValidator());
+        second.setNext(new ValidateGameAreaValidator());
+        return first;
     }
 
     @Override
     public void execut() {
-        if (newX == 0) return;
-        shape.resize(newX);
-        if (model.getRedShapes().stream().anyMatch(red -> red.intersects(shape))) {
-            undo();
-            System.out.println(" BLUE_SHAPE_RESIZED ERROR intersect un obstacle");
-        } else {
-            model.modelChanged("BLUE_SHAPE_RESIZED");
+        if (!validator.validate(model, shape, newX)) {
+            logger.warning("BLUE_SHAPE_RESIZED ERROR: validation failed");
+            return;
         }
+        shape.resize(newX);
+        model.modelChanged("BLUE_SHAPE_RESIZED");
     }
 
     @Override

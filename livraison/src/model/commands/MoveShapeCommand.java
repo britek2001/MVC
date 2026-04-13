@@ -34,6 +34,4 @@ public class MoveShapeCommand implements Command{
         shape.move(newX - oldX, newY - oldY);
         model.modelChanged("BLUE_SHAPE_MOVE_REDO");
     }
-    
-
 }

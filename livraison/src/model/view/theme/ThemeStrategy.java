@@ -17,13 +17,21 @@ public interface ThemeStrategy {
     Color getHudMutedTextColor();
 
     Color getButtonPrimaryBackground();
-    Color getButtonPrimaryForeground();
     Color getButtonSecondaryBackground();
     Color getButtonSecondaryForeground();
     Color getButtonBorderColor();
 
-    Font getButtonFont();
-    int getControlArc();
+    default Color getButtonPrimaryForeground() {
+        return Color.WHITE;
+    }
+
+    default Font getButtonFont() {
+        return new Font("SansSerif", Font.BOLD, 13);
+    }
+
+    default int getControlArc() {
+        return 14;
+    }
 
     default void stylePrimaryButton(JButton button) {
         styleButton(button, true);

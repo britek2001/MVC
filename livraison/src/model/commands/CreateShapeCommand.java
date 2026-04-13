@@ -1,8 +1,10 @@
 package mvc.model.commands;
 import mvc.model.game.GameModel;
 import mvc.model.shapes.GameShape;
+import java.util.logging.Logger;
 
 public class CreateShapeCommand implements Command{
+    private static final Logger logger = Logger.getLogger(CreateShapeCommand.class.getName());
     private GameModel model;
     private GameShape shape;
     private int index; 
@@ -19,12 +21,12 @@ public class CreateShapeCommand implements Command{
     public void execut(){
         boolean added = model.addBlueShape(shape);
         if(added){
-                System.out.println("Shape added");
+                logger.info("Shape added: " + shape);
                 index = model.getBlueShapes().indexOf(shape);
-                System.out.println("Index of created shape: " + index); 
+                logger.info("Index of created shape: " + index);
                 created = index != -1;
             } else {
-                System.out.println("Failed");
+                logger.warning("Failed to add shape: " + shape);
                 return; 
         }   
     }

@@ -28,9 +28,11 @@ public class EtatResizeShape implements EtatInteraction {
     }
     
     private int getResizeHandle(double mouseX, double mouseY) {
+        
         if (selectedShape instanceof Rectangle) {
             Rectangle r = (Rectangle) selectedShape;
             double handleSize = 8;
+
             if (Math.abs(mouseX - r.x) < handleSize && Math.abs(mouseY - r.y) < handleSize) return 5; // NW
             if (Math.abs(mouseX - (r.x + r.width)) < handleSize && Math.abs(mouseY - r.y) < handleSize) return 4; // NE
             if (Math.abs(mouseX - r.x) < handleSize && Math.abs(mouseY - (r.y + r.height)) < handleSize) return 7; // SW
@@ -139,46 +141,85 @@ public class EtatResizeShape implements EtatInteraction {
     @Override
     public void sourisRelachee(MouseEvent e, ControleurSouris controller) {
         if (model.isGameFinished() || model.getState() == GameState.GAME_OVER) {
-            dragging = false;
-            controller.changerEtat(new EtatSelection(model));
+            finishResize(controller);
             return;
         }
-        if (dragging) {
-            boolean intersectsRed = model.getRedShapes().stream()
-                    .anyMatch(redShape -> redShape.intersects(selectedShape));
-            boolean intersectsOtherBlue = model.isTwoPlayerMode() && model.getBlueShapes().stream()
-                    .anyMatch(blueShape -> blueShape != selectedShape && blueShape.intersects(selectedShape));
-            boolean outOfGameArea = !model.isShapeWithinGameArea(selectedShape);
-
-            if (intersectsRed || intersectsOtherBlue || outOfGameArea) {
-                if (selectedShape instanceof Rectangle) {
-                    Rectangle r = (Rectangle) selectedShape;
-                    r.x = originalX;
-                    r.y = originalY;
-                    r.width = originalWidth;
-                    r.height = originalHeight;
-                } else if (selectedShape instanceof Circle) {
-                    Circle c = (Circle) selectedShape;
-                    c.setPosition(originalX, originalY);
-                    double currentRadius = c.getRadius();
-                    if (currentRadius > 0) {
-                        c.resize(originalRadius / currentRadius);
-                    }
-                }
-                model.setState(outOfGameArea ? GameState.RESIZE_INVALID_BOUNDS : GameState.RESIZE_INVALID_INTERSECTION);
-            } else if (selectedShape instanceof Rectangle) {
-                Rectangle r = (Rectangle) selectedShape;
-                double factor = (originalWidth > 0) ? (r.width / originalWidth) : 1.0;
-                ResizeShapeCommand cmd = new ResizeShapeCommand(model, selectedShape, factor, 0);
-                controller.addCommand(cmd);
-            } else if (selectedShape instanceof Circle) {
-                Circle c = (Circle) selectedShape;
-                double factor = (originalRadius > 0) ? (c.getRadius() / originalRadius) : 1.0;
-                ResizeShapeCommand cmd = new ResizeShapeCommand(model, selectedShape, factor, 0);
-                controller.addCommand(cmd);
-            }
-            dragging = false;
+        if (!dragging) {
+            finishResize(controller);
+            return;
         }
+        
+        boolean hasInvalidState = validateAndHandleInvalidState(controller);
+        if (!hasInvalidState) {
+            executeResizeCommand(controller);
+        }
+        finishResize(controller);
+    }
+    
+    private boolean validateAndHandleInvalidState(ControleurSouris controller) {
+        boolean intersectsRed = model.getRedShapes().stream()
+                .anyMatch(redShape -> redShape.intersects(selectedShape));
+        boolean intersectsOtherBlue = model.isTwoPlayerMode() && model.getBlueShapes().stream()
+                .anyMatch(blueShape -> blueShape != selectedShape && blueShape.intersects(selectedShape));
+        boolean outOfGameArea = !model.isShapeWithinGameArea(selectedShape);
+        
+        if (intersectsRed || intersectsOtherBlue || outOfGameArea) {
+            restoreOriginalShape();
+            model.setState(outOfGameArea ? GameState.RESIZE_INVALID_BOUNDS : GameState.RESIZE_INVALID_INTERSECTION);
+            return true;
+        }
+        return false;
+    }
+    
+    private void restoreOriginalShape() {
+        if (selectedShape instanceof Rectangle) {
+            restoreRectangle();
+        } else if (selectedShape instanceof Circle) {
+            restoreCircle();
+        }
+    }
+    
+    private void restoreRectangle() {
+        Rectangle r = (Rectangle) selectedShape;
+        r.x = originalX;
+        r.y = originalY;
+        r.width = originalWidth;
+        r.height = originalHeight;
+    }
+    
+    private void restoreCircle() {
+        Circle c = (Circle) selectedShape;
+        c.setPosition(originalX, originalY);
+        double currentRadius = c.getRadius();
+        if (currentRadius > 0) {
+            c.resize(originalRadius / currentRadius);
+        }
+    }
+    
+    private void executeResizeCommand(ControleurSouris controller) {
+        if (selectedShape instanceof Rectangle) {
+            executeRectangleResize(controller);
+        } else if (selectedShape instanceof Circle) {
+            executeCircleResize(controller);
+        }
+    }
+    
+    private void executeRectangleResize(ControleurSouris controller) {
+        Rectangle r = (Rectangle) selectedShape;
+        double factor = (originalWidth > 0) ? (r.width / originalWidth) : 1.0;
+        ResizeShapeCommand cmd = new ResizeShapeCommand(model, selectedShape, factor, 0);
+        controller.addCommand(cmd);
+    }
+    
+    private void executeCircleResize(ControleurSouris controller) {
+        Circle c = (Circle) selectedShape;
+        double factor = (originalRadius > 0) ? (c.getRadius() / originalRadius) : 1.0;
+        ResizeShapeCommand cmd = new ResizeShapeCommand(model, selectedShape, factor, 0);
+        controller.addCommand(cmd);
+    }
+    
+    private void finishResize(ControleurSouris controller) {
+        dragging = false;
         model.setState(previousState);
         controller.changerEtat(new EtatSelection(model));
     }

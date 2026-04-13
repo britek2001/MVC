@@ -30,8 +30,10 @@ public class Circle implements GameShape {
     }
 
     public boolean intersects(Rectangle rectangle) {
-        double closestX =  Math.max(rectangle.x,  Math.min(this.x,  rectangle.x + rectangle.width));
-        double closestY = Math.max(rectangle.y,  Math.min(this.y,  rectangle.y + rectangle.height));
+        double rightEdge = rectangle.x + (double) rectangle.width;
+        double bottomEdge = rectangle.y + (double) rectangle.height;
+        double closestX = Math.max(rectangle.x, Math.min(this.x, rightEdge));
+        double closestY = Math.max(rectangle.y, Math.min(this.y, bottomEdge));
         double distanceX = this.x - closestX;
         double distanceY = this.y - closestY;
         double distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);

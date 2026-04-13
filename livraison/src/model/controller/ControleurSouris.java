@@ -1,5 +1,4 @@
 package mvc.model.controller;
-
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayDeque;
@@ -9,6 +8,7 @@ import java.util.List;
 import mvc.model.commands.Command;
 
 public class ControleurSouris extends MouseAdapter {
+    
     private EtatInteraction etatCourant;
     private List<Command> commandHistory = new ArrayList<>();
     private final Deque<Command> undoStack = new ArrayDeque<>();
