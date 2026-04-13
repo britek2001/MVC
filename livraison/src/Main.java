@@ -11,6 +11,7 @@ import mvc.model.strategies.AIPlayerStrategy;
 import mvc.model.strategies.RandomGenerationStrategy;
 import mvc.model.view.GameView;
 import mvc.model.view.MainMenuView;
+import mvc.model.view.GameTutorialView;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,12 @@ public class Main {
     
     public static void main(String[] args) {
         GameModel game = new GameModel();
-        showMenu(game);
+        showTutorial(game);
+    }
+    
+    private static void showTutorial(GameModel game) {
+        GameTutorialView tutorialView = new GameTutorialView();
+        tutorialView.show(() -> showMenu(game));
     }
     
     private static void showMenu(GameModel game) {
@@ -90,6 +96,10 @@ public class Main {
                 if (MainMenuView.STRATEGY_RANDOM.equals(strategyLabel)) {
                     game.generateRedShapes(config.redShapeCount, realGameAreaWidth, realGameAreaHeight);
                     System.out.println("Temps  pour definir les formes: " + config.timeSeconds + " secondes");
+                } else if (MainMenuView.STRATEGY_TWO_PLAYERS.equals(strategyLabel)) {
+                    game.setGenerationStrategy(new RandomGenerationStrategy());
+                    game.generateRedShapes(config.redShapeCount, realGameAreaWidth, realGameAreaHeight);
+                    System.out.println("Two Players: generation initiale de " + config.redShapeCount + " formes rouges");
                 } else {
                     System.out.println("Mode " + strategyLabel + ": pas de generation automatique de formes");
                 }

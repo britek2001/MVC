@@ -146,6 +146,7 @@ public class GamePainter {
     }
 
     private void drawHud(Graphics2D g2, GameModel model, GameState state, int gameWidth, int panelHeight, ThemeStrategy theme) {
+        
         double remainingLevelSeconds = model.getRemainingRedTime() / 1000.0;
         double levelLimitMillis = Math.max(model.getCurrentRedTimeLimitMillis(), 1L);
         double levelRatio = Math.max(0.0, Math.min(1.0, model.getRemainingRedTime() / levelLimitMillis));

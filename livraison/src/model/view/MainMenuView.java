@@ -2,6 +2,7 @@ package mvc.model.view;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -17,6 +18,8 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JLabel;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -88,21 +91,35 @@ public class MainMenuView {
             JComboBox<String> difficultyComboBox = new JComboBox<>(difficulties);
 
             JLabel themeLabel = new JLabel("Theme:");
-            String[] themes = {ThemeStrategyFactory.THEME_LIGHT, ThemeStrategyFactory.THEME_DARK};
-            JComboBox<String> themeComboBox = new JComboBox<>(themes);
+            styleRetroLabel(themeLabel);
+
+            JPanel themePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+            themePanel.setBackground(RETRO_PURPLE_PANEL);
+            themePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+
+            ButtonGroup themeGroup = new ButtonGroup();
+            JRadioButton lightButton = new JRadioButton(ThemeStrategyFactory.THEME_LIGHT, true);
+            JRadioButton darkButton = new JRadioButton(ThemeStrategyFactory.THEME_DARK);
+
+            styleRetroRadioButton(lightButton);
+            styleRetroRadioButton(darkButton);
+
+            themeGroup.add(lightButton);
+            themeGroup.add(darkButton);
+
+            themePanel.add(lightButton);
+            themePanel.add(darkButton);
 
             styleRetroLabel(strategyLabel);
             styleRetroLabel(difficultyLabel);
-            styleRetroLabel(themeLabel);
             styleRetroCombo(strategyComboBox);
             styleRetroCombo(difficultyComboBox);
-            styleRetroCombo(themeComboBox);
 
             StyledButtonFactory buttonFactory = new StyledButtonFactory(ThemeManager.getCurrentTheme());
             JButton startButton = buttonFactory.createPrimaryButton(" Comencer le jeu ", () -> {
                 String selectedStrategy = (String) strategyComboBox.getSelectedItem();
                 String selectedDifficulty = (String) difficultyComboBox.getSelectedItem();
-                String selectedTheme = (String) themeComboBox.getSelectedItem();
+                String selectedTheme = lightButton.isSelected() ? ThemeStrategyFactory.THEME_LIGHT : ThemeStrategyFactory.THEME_DARK;
                 ThemeManager.setCurrentTheme(ThemeStrategyFactory.fromName(selectedTheme));
                 int level = mapDifficultyToLevel(selectedDifficulty);
 
@@ -148,7 +165,8 @@ public class MainMenuView {
 
             gbc.gridx = 1;
             gbc.insets = new Insets(2, 0, 2, 0);
-            panel.add(themeComboBox, gbc);
+            gbc.anchor = GridBagConstraints.WEST;
+            panel.add(themePanel, gbc);
 
             gbc.gridx = 0;
             gbc.gridy++;
@@ -194,6 +212,13 @@ public class MainMenuView {
                 return label;
             }
         });
+    }
+
+    private void styleRetroRadioButton(JRadioButton button) {
+        button.setBackground(RETRO_PURPLE_PANEL);
+        button.setForeground(RETRO_TEXT);
+        button.setFont(RETRO_LABEL_FONT);
+        button.setFocusPainted(false);
     }
 
     private MenuSelection askTwoPlayerNames(JFrame parentFrame, int level, String difficultyLabel) {

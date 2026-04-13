@@ -50,10 +50,10 @@ public class GameCPanel extends JPanel {
 
         JButton createRectangleButton = createShapeButton(ShapeType.RECTANGLE, onCreateRectangle, true);
         JButton createCircleButton = createShapeButton(ShapeType.CIRCLE, onCreateCircle, true);
-        JButton eliminateSelectedButton = createSquareButton("✕", onDeleteSelected, false);
-        JButton undoButton = createSquareButton("↶", onUndo, false);
-        JButton redoButton = createSquareButton("↷", onRedo, false);
-        JButton endGameButton = createSquareButton("⊠", onEndGame, true);
+        JButton eliminateSelectedButton = createSquareButton("X", onDeleteSelected, false);
+        JButton undoButton = createSquareButton("<-", onUndo, false);
+        JButton redoButton = createSquareButton("->", onRedo, false);
+        JButton endGameButton = createSquareButton(" Finish ", onEndGame, true);
 
         add(createRectangleButton);
         add(createCircleButton);

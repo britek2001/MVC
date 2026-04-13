@@ -341,15 +341,21 @@ public class GameView extends JPanel implements Observer {
             } else {
                 JLabel resultLabel = new JLabel(model.isGameWon() ? "Victoire !" : "Defaite !");
                 resultLabel.setAlignmentX(LEFT_ALIGNMENT);
-                JLabel scoreLabel = new JLabel("Score = espace couvert: " + model.getFinalCoveredArea());
+                JLabel levelScoreLabel = new JLabel("Score niveau " + model.getLevel() + ": " + model.getScoreForLevel(model.getLevel()));
+                levelScoreLabel.setAlignmentX(LEFT_ALIGNMENT);
+                JLabel scoreLabel = new JLabel("Score total cumulé: " + model.getFinalCoveredArea());
                 scoreLabel.setAlignmentX(LEFT_ALIGNMENT);
                 JLabel shapesLabel = new JLabel("Formes posées: " + model.getBlueShapesPlacedThisLevel() + "/" + model.getBlueShapesPerLevel());
                 shapesLabel.setAlignmentX(LEFT_ALIGNMENT);
+                JLabel historyLabel = new JLabel("Historique niveaux: " + model.getLevelScores());
+                historyLabel.setAlignmentX(LEFT_ALIGNMENT);
                 JLabel magistralLabel = new JLabel("VICTOIRE MAGISTRAL");
                 magistralLabel.setAlignmentX(LEFT_ALIGNMENT);
 
                 content.add(resultLabel);
                 content.add(Box.createVerticalStrut(8));
+                content.add(levelScoreLabel);
+                content.add(Box.createVerticalStrut(4));
                 if (model.isMagistralWin()) {
                     content.add(magistralLabel);
                     content.add(Box.createVerticalStrut(4));
@@ -358,6 +364,8 @@ public class GameView extends JPanel implements Observer {
                     content.add(Box.createVerticalStrut(4));
                 }
                 content.add(shapesLabel);
+                content.add(Box.createVerticalStrut(4));
+                content.add(historyLabel);
             }
 
             JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));

@@ -30,6 +30,7 @@ public class GameModel extends Observable {
     private GameState state;
     private int currentLevel;
     private int totalScore;
+    private final List<Integer> levelScores;
     private int width;
     private int height;
     private int gameAreaTopInset;
@@ -50,6 +51,7 @@ public class GameModel extends Observable {
     private long gameEndsAtMillis;
     private long currentGameTimeLimitMillis;
     private boolean globalTimerStarted;
+    private TimerTask levelGameTimeoutTask;
     
     private static final int MAX_LEVEL = 5;
     private static final int MAX_TURNS_PER_PLAYER = 4;
@@ -62,6 +64,7 @@ public class GameModel extends Observable {
         state = GameState.WAITING_FOR_RED;
         currentLevel = 0;
         totalScore = 0;
+        levelScores = new ArrayList<>();
         width = 800;
         height = 600;
         gameAreaTopInset = 0;
@@ -83,6 +86,7 @@ public class GameModel extends Observable {
         gameEndsAtMillis = 0;
         currentGameTimeLimitMillis = TOTAL_GAME_DURATION_MILLIS;
         globalTimerStarted = false;
+        levelGameTimeoutTask = null;
     }
 
     public boolean areRedShapesVisible() {
@@ -283,6 +287,7 @@ public class GameModel extends Observable {
                     completeTwoPlayerTurn();
                     modelChanged("LEVEL_COMPLETE");
                 } else {
+                    recordCurrentLevelScore();
                     if (!globalTimerStarted || generationStrategy == null) {
                         finishGame(true);
                     } else {
@@ -309,6 +314,42 @@ public class GameModel extends Observable {
             totalArea += shape.getArea();
         }
         return (int)totalArea;
+    }
+
+    private void recordCurrentLevelScore() {
+        if (twoPlayerMode) {
+            return;
+        }
+        int level = Math.max(1, currentLevel);
+        int index = level - 1;
+        while (levelScores.size() <= index) {
+            levelScores.add(0);
+        }
+        levelScores.set(index, calculateScore());
+    }
+
+    public int getCurrentLevelScore() {
+        return calculateScore();
+    }
+
+    public int getScoreForLevel(int level) {
+        int index = level - 1;
+        if (index < 0 || index >= levelScores.size()) {
+            return 0;
+        }
+        return levelScores.get(index);
+    }
+
+    public List<Integer> getLevelScores() {
+        return new ArrayList<>(levelScores);
+    }
+
+    public int getCumulativeLevelScore() {
+        int sum = 0;
+        for (Integer s : levelScores) {
+            sum += s;
+        }
+        return sum;
     }
 
     public void removeBlueShape(GameShape shape) {
@@ -359,6 +400,7 @@ public class GameModel extends Observable {
         turnsPlayed = 0;
         redPlayerScore = 0;
         bluePlayerScore = 0;
+        levelScores.clear();
         turnStartCoveredArea = 0;
         redShapes.clear();
         blueShapes.clear();
@@ -393,14 +435,22 @@ public class GameModel extends Observable {
         gameEndsAtMillis = 0;
         currentGameTimeLimitMillis = TOTAL_GAME_DURATION_MILLIS;
         globalTimerStarted = false;
+        levelScores.clear();
         modelChanged("TWO_PLAYER_DISABLED");
     }
 
     private void finishGame(boolean won) {
+        if (levelGameTimeoutTask != null) {
+            levelGameTimeoutTask.cancel();
+            levelGameTimeoutTask = null;
+        }
+        if (!twoPlayerMode) {
+            recordCurrentLevelScore();
+        }
         gameFinished = true;
         gameWon = won;
         magistralWin = won && !twoPlayerMode && currentLevel >= MAX_LEVEL;
-        finalCoveredArea = calculateScore();
+        finalCoveredArea = twoPlayerMode ? calculateScore() : getCumulativeLevelScore();
         totalScore = finalCoveredArea;
         state = GameState.GAME_OVER;
         modelChanged("GAME_OVER");
@@ -595,18 +645,24 @@ public class GameModel extends Observable {
             return;
         }
 
+        // One timeout task per level: cancel previous level timer before starting a new one.
+        if (levelGameTimeoutTask != null) {
+            levelGameTimeoutTask.cancel();
+        }
+
         globalTimerStarted = true;
         currentGameTimeLimitMillis = TOTAL_GAME_DURATION_MILLIS;
         gameEndsAtMillis = System.currentTimeMillis() + TOTAL_GAME_DURATION_MILLIS;
 
-        timer.schedule(new TimerTask() {
+        levelGameTimeoutTask = new TimerTask() {
             @Override
             public void run() {
                 if (!gameFinished) {
                     finishGame(false);
                 }
             }
-        }, TOTAL_GAME_DURATION_MILLIS);
+        };
+        timer.schedule(levelGameTimeoutTask, TOTAL_GAME_DURATION_MILLIS);
     }
 
     private List<GameShape> generateValidRedShapes(int count, int panelWidth, int panelHeight) {

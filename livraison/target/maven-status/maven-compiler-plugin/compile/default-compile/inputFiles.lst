@@ -3,6 +3,7 @@
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/games/GameModel.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/shapes/Circle.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/view/CommandHManager.java
+/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/view/GameTutorialView.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/controller/EtatMoveShape.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/view/GameCPanel.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/commands/DeleteShapeCommand.java

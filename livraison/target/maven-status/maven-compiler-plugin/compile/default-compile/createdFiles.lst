@@ -33,11 +33,13 @@ mvc/model/controller/ControleurSouris.class
 mvc/model/game/GameModel.class
 mvc/model/view/theme/LightThemeStrategy.class
 mvc/model/controller/EtatMoveShape.class
+mvc/model/view/GameTutorialView$1.class
 mvc/model/controller/EtatCreationRectangle.class
 mvc/model/commands/DeleteShapeCommand.class
 mvc/model/view/theme/ThemeStrategy.class
 mvc/model/game/Player.class
 mvc/model/controller/EtatCreationCercle.class
+mvc/model/view/GameTutorialView.class
 mvc/model/game/GameModel$1.class
 mvc/model/controller/EtatSelection.class
 mvc/model/shapes/Circle.class
