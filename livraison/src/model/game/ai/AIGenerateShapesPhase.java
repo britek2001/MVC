@@ -16,8 +16,6 @@ public class AIGenerateShapesPhase extends AIShapeGenerationPhase {
 
     @Override
     protected List<GameShape> generateShapes(GameModel model, int count, int panelWidth, int panelHeight) {
-        logger.info("AI: Generating " + count + " figure base dans le jeux de model");
-
         List<GameShape> generatedShapes = new ArrayList<>();
         int attempts = 0;
         double adjustedSize = calculateAdjustedSize(panelWidth, panelHeight, Math.max(1, count));

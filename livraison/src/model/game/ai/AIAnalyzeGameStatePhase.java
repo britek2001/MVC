@@ -14,8 +14,6 @@ public class AIAnalyzeGameStatePhase extends AIShapeGenerationPhase {
         logger.info("AI: IA analise de figure Bleu: " + model.getBlueShapes().size());
 
         int blueCoverage = calculateBlueCoverage(model);
-        logger.info("AI: Figure Bleu coverage calculated: " + blueCoverage);
-
         if (blueCoverage > 50) {
             logger.info("AI: Utilise une strategie defensive");
         } else {

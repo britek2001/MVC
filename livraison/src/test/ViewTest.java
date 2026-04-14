@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 class ViewTest {
 
 	@Test
-	@DisplayName("GameCPanel: boutons et callbacks")
+	@DisplayName("gameCPanelButtonsAndCallbackss")
 	void gameCPanelButtonsAndCallbacks() {
 		GameModel model = new GameModel();
 		AtomicInteger rect = new AtomicInteger();
@@ -79,7 +79,7 @@ class ViewTest {
 	}
 
 	@Test
-	@DisplayName("Theme: factory, manager et styles boutons")
+	@DisplayName("themeFactoryAndButtonFactory")
 	void themeFactoryAndButtonFactory() {
 		ThemeStrategy light = ThemeStrategyFactory.fromName("unknown");
 		ThemeStrategy dark = ThemeStrategyFactory.fromName("Dark");
@@ -102,7 +102,7 @@ class ViewTest {
 	}
 
 	@Test
-	@DisplayName("MainMenuView: mapping difficulté")
+	@DisplayName("mainMenuDifficultyMapping")
 	void mainMenuDifficultyMapping() throws Exception {
 		MainMenuView menu = new MainMenuView();
 		Method map = MainMenuView.class.getDeclaredMethod("mapDifficultyToLevel", String.class);
@@ -146,7 +146,7 @@ class ViewTest {
 	}
 
 	@Test
-	@DisplayName("GamePainter: paint nominal + preview")
+	@DisplayName("gamePainterPaintNominal")
 	void gamePainterPaintNominal() {
 		GameModel model = new GameModel();
 		model.setGameAreaSize(900, 700);
@@ -166,7 +166,7 @@ class ViewTest {
 	}
 
 	@Test
-	@DisplayName("GamePainter: preview drag rectangle et cercle")
+	@DisplayName("gamePainterDragPreviewBranchese")
 	void gamePainterDragPreviewBranches() {
 		GameModel model = new GameModel();
 		model.setGameAreaSize(900, 700);
@@ -196,7 +196,7 @@ class ViewTest {
 	}
 
 	@Test
-	@DisplayName("GameView: create/delete/undo/redo depuis la barre")
+	@DisplayName("gameViewControlButtonsFlow")
 	void gameViewControlButtonsFlow() {
 		GameModel model = new GameModel();
 		AtomicInteger onEnd = new AtomicInteger();
@@ -227,7 +227,7 @@ class ViewTest {
 	}
 
 	@Test
-	@DisplayName("GameView: helpers privés findShapeAt et getTargetShape")
+	@DisplayName("gameViewPrivateHelpers")
 	void gameViewPrivateHelpers() throws Exception {
 		GameModel model = new GameModel();
 		GameView view = new GameView(model, null, () -> { }, null);
