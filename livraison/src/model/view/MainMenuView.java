@@ -117,7 +117,7 @@ public class MainMenuView {
             styleRetroCombo(difficultyComboBox);
 
             StyledButtonFactory buttonFactory = new StyledButtonFactory(ThemeManager.getCurrentTheme());
-            JButton startButton = buttonFactory.createPrimaryButton(" Comencer le jeu ", () -> {
+            JButton startButton = buttonFactory.createPrimaryButton(" Commencer le jeu ", () -> {
                 String selectedStrategy = (String) strategyComboBox.getSelectedItem();
                 String selectedDifficulty = (String) difficultyComboBox.getSelectedItem();
                 String selectedTheme = lightButton.isSelected() ? ThemeStrategyFactory.THEME_LIGHT : ThemeStrategyFactory.THEME_DARK;

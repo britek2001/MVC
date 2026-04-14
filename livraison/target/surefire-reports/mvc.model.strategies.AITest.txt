@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
-Test set: mvc.model.view.ViewTest
+Test set: mvc.model.strategies.AITest
 -------------------------------------------------------------------------------
-Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.534 s -- in mvc.model.view.ViewTest
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.026 s -- in mvc.model.strategies.AITest

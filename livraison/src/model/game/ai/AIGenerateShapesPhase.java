@@ -16,21 +16,36 @@ public class AIGenerateShapesPhase extends AIShapeGenerationPhase {
 
     @Override
     protected List<GameShape> generateShapes(GameModel model, int count, int panelWidth, int panelHeight) {
+        if (model == null || model.isGameFinished()) {
+            return new ArrayList<>();
+        }
         List<GameShape> generatedShapes = new ArrayList<>();
         int attempts = 0;
         double adjustedSize = calculateAdjustedSize(panelWidth, panelHeight, Math.max(1, count));
 
+        if (panelWidth < 80 || panelHeight < 80) {
+            logger.warning("AI: panel too small for generation: " + panelWidth + "x" + panelHeight);
+            return generatedShapes;
+        }
+
         while (generatedShapes.size() < count && attempts < 1000) {
             GameShape candidate = createRandomShape(attempts, count, generatedShapes.size(), panelWidth, panelHeight, adjustedSize);
 
-            if (isValidAgainstRedShapes(candidate, model)
+            boolean valid = isValidAgainstRedShapes(candidate, model)
                     && isValidAgainstOtherShapes(candidate, generatedShapes)
-                    && isValidAgainstBlueShapes(candidate, model)) {
+                    && isValidAgainstBlueShapes(candidate, model);
+
+            if (valid) {
                 generatedShapes.add(candidate);
                 logger.info("AI: Figure " + (generatedShapes.size()) + " added - " + candidate.getClass().getSimpleName());
+            } else {
+                attempts++;
+                if (attempts % 50 == 0 && adjustedSize > 6.0) {
+                    adjustedSize = Math.max(5.0, adjustedSize * 0.85);
+                    logger.info("AI: reducing adjustedSize to " + adjustedSize + " after " + attempts + " failed attempts");
+                }
+                logger.fine("AI: ATTEMPT " + attempts + " failed");
             }
-            logger.warning("AI: ATTEMPT " + (attempts + 1) + " failed");
-            attempts++;
         }
         logger.info("AI: Generer " + generatedShapes.size() + " figures in " + attempts + " attempts");
         return generatedShapes;

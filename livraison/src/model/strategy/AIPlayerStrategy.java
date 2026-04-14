@@ -25,7 +25,11 @@ public class AIPlayerStrategy implements ShapeGenerationStrategy {
     public List<GameShape> generateShapes(int count, int panelWidth, int panelHeight) {
         this.panelWidth = panelWidth;
         this.panelHeight = panelHeight;
-        
+        if (gameModel != null && gameModel.isGameFinished()) {
+            logger.info("AI: game finished — skipping generation");
+            return new ArrayList<>();
+        }
+
         if (isHumanTurn) {
             return new ArrayList<>();
         } else {

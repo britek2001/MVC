@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: mvc.model.controller.EtatCreationCercleTest
 -------------------------------------------------------------------------------
-Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.448 s -- in mvc.model.controller.EtatCreationCercleTest
+Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.111 s -- in mvc.model.controller.EtatCreationCercleTest

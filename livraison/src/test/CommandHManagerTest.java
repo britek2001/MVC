@@ -54,9 +54,7 @@ class CommandHManagerTest {
         manager.executeAndStore(cmd);
         manager.undo();
         assertFalse(model.getBlueShapes().contains(testCircle));
-        
         boolean redone = manager.redo();
-        
         assertTrue(redone);
         assertTrue(model.getBlueShapes().contains(testCircle));
     }
@@ -67,9 +65,7 @@ class CommandHManagerTest {
         CreateShapeCommand cmd1 = new CreateShapeCommand(model, testCircle);
         manager.executeAndStore(cmd1);
         manager.undo();
-        
         assertTrue(manager.redo());
-        
         Circle anotherCircle = new Circle(200, 200, 15, Color.BLUE);
         CreateShapeCommand cmd2 = new CreateShapeCommand(model, anotherCircle);
         manager.executeAndStore(cmd2);
