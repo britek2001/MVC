@@ -21,7 +21,6 @@
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/game/ai/AIAnalyzeGameStatePhase.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/commands/CreateShapeCommand.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/commands/ValidateIntersectionValidator.java
-/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/observer/observateur.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/shapes/Circle.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/view/CommandHManager.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/game/ai/AIDecideShapeSizePhase.java
@@ -41,7 +40,6 @@
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/controller/EtatResizeShape.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/strategy/ClickPlacementStrategy.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/view/theme/StyledButtonFactory.java
-/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/observer/observable.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/view/theme/ThemeStrategyFactory.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/commands/ResizeShapeCommand.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/game/ai/AIShapeGenerationPhase.java

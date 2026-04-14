@@ -47,6 +47,8 @@ public class GameView extends JPanel implements Observer {
     private Timer aiMoveTimer;
     private Timer aiPlacementAnimationTimer;
     private Timer aiNextShapeTimer;
+    private Thread aiTurnWorkerThread;
+    private volatile boolean aiTurnWorkerRunning;
     private boolean aiTurnInProgress;
     private GameShape aiPreviewShape;
     private java.util.List<GameShape> pendingAIShapes;
@@ -77,6 +79,7 @@ public class GameView extends JPanel implements Observer {
         setLayout(new BorderLayout());
         hudRefreshTimer.start();
         initializeControls();
+        startAITurnWorkerIfNeeded();
         
         addMouseListener(new MouseAdapter() {
             @Override
@@ -129,6 +132,7 @@ public class GameView extends JPanel implements Observer {
     public void removeNotify() {
         hudRefreshTimer.stop();
         stopAITimers();
+        stopAITurnWorker();
         model.deleteObserver(this);
         super.removeNotify();
     }
@@ -148,12 +152,51 @@ public class GameView extends JPanel implements Observer {
         if (isAIMatch()) {
             if (model.isRedPlayerTurn()) {
                 aiStrategy.switchToAITurn();
-                if (!aiTurnInProgress) {
+                if (turnCoordinator == null && !aiTurnInProgress) {
                     scheduleAIMove();
                 }
             } else {
                 aiStrategy.switchToHumanTurn();
             }
+        }
+    }
+
+    private void startAITurnWorkerIfNeeded() {
+        if (!isAIMatch() || turnCoordinator == null) {
+            return;
+        }
+        aiTurnWorkerRunning = true;
+        aiTurnWorkerThread = new Thread(() -> {
+            while (aiTurnWorkerRunning) {
+                try {
+                    turnCoordinator.awaitState(PlayerTurnState.AI);
+                    if (!aiTurnWorkerRunning || model.isGameFinished()) {
+                        break;
+                    }
+                    SwingUtilities.invokeLater(() -> {
+                        if (!aiTurnInProgress) {
+                            scheduleAIMove();
+                        }
+                    });
+                    turnCoordinator.awaitTurnCompletion();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }, "ai-turn-worker");
+        aiTurnWorkerThread.setDaemon(true);
+        aiTurnWorkerThread.start();
+    }
+
+    private void stopAITurnWorker() {
+        aiTurnWorkerRunning = false;
+        if (turnCoordinator != null) {
+            turnCoordinator.abortTurn();
+        }
+        if (aiTurnWorkerThread != null) {
+            aiTurnWorkerThread.interrupt();
+            aiTurnWorkerThread = null;
         }
     }
 

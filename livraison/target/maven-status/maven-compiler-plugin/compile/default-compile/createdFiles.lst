@@ -38,7 +38,6 @@ mvc/model/controller/EtatResizeShape.class
 mvc/model/shapes/Rectangle.class
 mvc/model/game/ai/AIShapeGenerationPhase.class
 mvc/model/commands/ResizeShapeCommand.class
-Observateur.class
 mvc/model/view/MainMenuView.class
 mvc/model/game/ai/AIGenerateShapesPhase.class
 mvc/model/strategies/ShapeGenerationStrategy.class
@@ -61,7 +60,6 @@ mvc/model/controller/EtatSelection.class
 mvc/model/game/turn/TurnSignal.class
 mvc/model/shapes/Circle.class
 mvc/model/view/GameView$2.class
-Observable.class
 mvc/model/strategies/AIPlayerStrategy.class
 mvc/model/view/theme/StyledButtonFactory.class
 mvc/model/game/LevelConfig.class

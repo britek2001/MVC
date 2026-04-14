@@ -1,0 +1,7 @@
+mvc/model/shapes/ShapeTest.class
+mvc/model/view/ViewTest.class
+mvc/model/view/CommandHManagerTest.class
+mvc/model/game/turn/TurnCoordinatorTest.class
+mvc/model/game/GameModelTest.class
+mvc/model/view/ViewTest$1.class
+mvc/model/commands/CommandTest.class

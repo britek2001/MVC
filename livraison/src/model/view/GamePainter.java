@@ -27,7 +27,7 @@ public class GamePainter {
         GameState state = model.getState();
         int panelWidth = g2.getClipBounds() != null ? g2.getClipBounds().width : model.getGameWidth() + 400;
         int panelHeight = g2.getClipBounds() != null ? g2.getClipBounds().height : model.getGameHeight();
-        int gameWidth = Math.max(1, panelWidth - 400);
+        int gameWidth = (int) Math.max(1.0, (double) panelWidth - 400.0d);
 
         model.setGameAreaSize(gameWidth, panelHeight);
         model.setGameAreaTopInset(CONTROL_BAR_HEIGHT);
@@ -137,8 +137,7 @@ public class GamePainter {
         } else if (estado instanceof EtatCreationCercle) {
             EtatCreationCercle est = (EtatCreationCercle) estado;
             if (est.isDragging()) {
-                double rayon = Math.sqrt(Math.pow(est.getCurrentX() - est.getStartX(), 2)
-                        + Math.pow(est.getCurrentY() - est.getStartY(), 2));
+                double rayon = Math.hypot((double) est.getCurrentX() - (double) est.getStartX(), (double) est.getCurrentY() - (double) est.getStartY());
 
                 g2.setColor(new Color(0, 100, 200, 100));
                 g2.fillOval((int) (est.getStartX() - rayon), (int) (est.getStartY() - rayon),
@@ -163,7 +162,7 @@ public class GamePainter {
         int infoX = gameWidth + 16;
         int cardY = CONTROL_BAR_HEIGHT + 14;
         int cardW = 368;
-        int cardH = Math.max(350, panelHeight - cardY - 14);
+        int cardH = (int) Math.max(350.0, (double) panelHeight - (double) cardY - 14.0d);
         int arc = theme.getControlArc();
 
         g2.setColor(theme.getHudCardBackgroundColor());
@@ -211,7 +210,9 @@ public class GamePainter {
             g2.setColor(theme.getHudMutedTextColor());
             int modeStartY = Math.max(levelBarY + 44, cardY + 330);
             g2.drawString("Mode: 2 joueurs", infoX, modeStartY);
+            g2.setColor(model.isRedPlayerTurn() ? Color.RED : Color.BLUE);
             g2.drawString("Tour: " + model.getCurrentPlayerName() + " [" + model.getCurrentPlayerColorLabel() + "]", infoX, modeStartY + 24);
+            g2.setColor(theme.getHudMutedTextColor());
             g2.drawString("Tours: " + model.getTurnsPlayed() + "/" + (model.getMaxTurnsPerPlayer() * 2), infoX, modeStartY + 48);
             g2.drawString(model.getRedPlayerName() + " score: " + model.getRedPlayerScore(), infoX, modeStartY + 72);
             g2.drawString(model.getBluePlayerName() + " score: " + model.getBluePlayerScore(), infoX, modeStartY + 96);

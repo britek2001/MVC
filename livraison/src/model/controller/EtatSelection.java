@@ -35,7 +35,18 @@ public class EtatSelection implements EtatInteraction {
         controller.getEtatCourant().sourisAppuyee(e, controller);
     }
 
-    @Override public void sourisDeplacee(MouseEvent e, ControleurSouris controller) {}
-    @Override public void sourisRelachee(MouseEvent e, ControleurSouris controller) {}
-    @Override public void sourisBougee(MouseEvent e, ControleurSouris controller) {}
+    @Override
+    public void sourisDeplacee(MouseEvent e, ControleurSouris controller) {
+        // Intentionally empty
+    }
+
+    @Override
+    public void sourisRelachee(MouseEvent e, ControleurSouris controller) {
+        // Intentionally empty
+    }
+
+    @Override
+    public void sourisBougee(MouseEvent e, ControleurSouris controller) {
+        // Intentionally empty
+    }
 }

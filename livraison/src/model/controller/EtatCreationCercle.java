@@ -1,19 +1,19 @@
 package mvc.model.controller;
 
-import java.awt.Color;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 import mvc.model.game.GameModel;
 import mvc.model.shapes.Circle;
 import mvc.model.strategies.ShapeGenerationStrategy;
 import mvc.model.strategies.ClickPlacementStrategy;
 
 public class EtatCreationCercle implements EtatInteraction {
-    private GameModel modele;
+    private final GameModel modele;
     private int startX, startY, currentX, currentY;
     private boolean isDragging = false;
 
     public EtatCreationCercle(GameModel modele) {
-        this.modele = modele;
+        this.modele = Objects.requireNonNull(modele, "modele must not be null");
     }
 
     @Override
@@ -49,12 +49,10 @@ public class EtatCreationCercle implements EtatInteraction {
             return;
         }
         if (isDragging) {
-            double rayon = Math.sqrt(Math.pow(currentX - startX, 2) + Math.pow(currentY - startY, 2));
+            double rayon = Math.hypot(currentX - startX, currentY - startY);
 
             if (rayon < 10) {
-                isDragging = false;
-                modele.modelChanged("DRAG_END");
-                controller.changerEtat(new EtatSelection(modele));
+                endDrag(controller);
                 return;
             }
 
@@ -68,8 +66,14 @@ public class EtatCreationCercle implements EtatInteraction {
             }
             modele.addBlueShape(cercle);
 
-            isDragging = false;
-            modele.modelChanged("DRAG_END");
+            endDrag(controller);
+        }
+    }
+
+    private void endDrag(ControleurSouris controller) {
+        isDragging = false;
+        modele.modelChanged("DRAG_END");
+        if (controller != null) {
             controller.changerEtat(new EtatSelection(modele));
         }
     }

@@ -10,8 +10,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JRadioButton;
 import javax.swing.JTextPane;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -116,6 +119,59 @@ class ViewTest {
 		assertEquals(4, map.invoke(menu, "Tres difficile"));
 		assertEquals(5, map.invoke(menu, "Extreme"));
 		assertEquals(1, map.invoke(menu, "autre"));
+	}
+
+	@Test
+	@DisplayName("mainMenuStyleHelpers")
+	void mainMenuStyleHelpers() throws Exception {
+		MainMenuView menu = new MainMenuView();
+
+		Method styleLabel = MainMenuView.class.getDeclaredMethod("styleRetroLabel", JLabel.class);
+		styleLabel.setAccessible(true);
+		JLabel label = new JLabel("Theme");
+		styleLabel.invoke(menu, label);
+		assertNotNull(label.getFont());
+		assertNotNull(label.getForeground());
+
+		Method styleCombo = MainMenuView.class.getDeclaredMethod("styleRetroCombo", JComboBox.class);
+		styleCombo.setAccessible(true);
+		JComboBox<String> comboBox = new JComboBox<>(new String[] {"A", "B"});
+		styleCombo.invoke(menu, comboBox);
+		assertNotNull(comboBox.getRenderer());
+		assertNotNull(comboBox.getBorder());
+
+		Method styleRadio = MainMenuView.class.getDeclaredMethod("styleRetroRadioButton", JRadioButton.class);
+		styleRadio.setAccessible(true);
+		JRadioButton radioButton = new JRadioButton("Light");
+		styleRadio.invoke(menu, radioButton);
+		assertNotNull(radioButton.getFont());
+		assertNotNull(radioButton.getForeground());
+	}
+
+	@Test
+	@DisplayName("menuSelectionRecordStoresValues")
+	void menuSelectionRecordStoresValues() {
+		MainMenuView.MenuSelection selection = new MainMenuView.MenuSelection(
+				3,
+				"Difficile",
+				MainMenuView.STRATEGY_TWO_PLAYERS,
+				true,
+				"Rouge",
+				"Bleu");
+
+		assertEquals(3, selection.level());
+		assertEquals("Difficile", selection.difficultyLabel());
+		assertEquals(MainMenuView.STRATEGY_TWO_PLAYERS, selection.strategyLabel());
+		assertTrue(selection.isTwoPlayers());
+		assertEquals("Rouge", selection.redPlayerName());
+		assertEquals("Bleu", selection.bluePlayerName());
+	}
+
+	@Test
+	@DisplayName("menuShowRejectsNullCallback")
+	void menuShowRejectsNullCallback() {
+		MainMenuView menu = new MainMenuView();
+		assertThrows(NullPointerException.class, () -> menu.show(null));
 	}
 
 	@Test

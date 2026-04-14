@@ -1,3 +1,0 @@
-interface Observateur {
-    void mettreAJour();
-}

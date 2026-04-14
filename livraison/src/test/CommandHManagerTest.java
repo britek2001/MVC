@@ -87,4 +87,57 @@ class CommandHManagerTest {
     void testRedoEmpty() {
         assertFalse(manager.redo());
     }
+
+    @Test
+    @DisplayName("testUndoRedoOrderWithMultipleCommands")
+    void testUndoRedoOrderWithMultipleCommands() {
+        Circle c1 = new Circle(100, 100, 20, Color.BLUE);
+        Circle c2 = new Circle(200, 200, 20, Color.BLUE);
+
+        CreateShapeCommand cmd1 = new CreateShapeCommand(model, c1);
+        CreateShapeCommand cmd2 = new CreateShapeCommand(model, c2);
+
+        manager.executeAndStore(cmd1);
+        manager.executeAndStore(cmd2);
+        assertEquals(2, model.getBlueShapes().size());
+
+        assertTrue(manager.undo());
+        assertFalse(model.getBlueShapes().contains(c2));
+        assertTrue(model.getBlueShapes().contains(c1));
+
+        assertTrue(manager.undo());
+        assertFalse(model.getBlueShapes().contains(c1));
+        assertEquals(0, model.getBlueShapes().size());
+
+        assertTrue(manager.redo());
+        assertTrue(model.getBlueShapes().contains(c1));
+        assertFalse(model.getBlueShapes().contains(c2));
+
+        assertTrue(manager.redo());
+        assertTrue(model.getBlueShapes().contains(c1));
+        assertTrue(model.getBlueShapes().contains(c2));
+        assertEquals(2, model.getBlueShapes().size());
+    }
+
+    @Test
+    @DisplayName("testNewCommandAfterUndoClearsRedoStack")
+    void testNewCommandAfterUndoClearsRedoStack() {
+        Circle c1 = new Circle(100, 100, 20, Color.BLUE);
+        Circle c2 = new Circle(200, 200, 20, Color.BLUE);
+        Circle c3 = new Circle(300, 300, 20, Color.BLUE);
+
+        manager.executeAndStore(new CreateShapeCommand(model, c1));
+        manager.executeAndStore(new CreateShapeCommand(model, c2));
+        assertEquals(2, model.getBlueShapes().size());
+
+        assertTrue(manager.undo());
+        assertFalse(model.getBlueShapes().contains(c2));
+
+        manager.executeAndStore(new CreateShapeCommand(model, c3));
+        assertTrue(model.getBlueShapes().contains(c1));
+        assertTrue(model.getBlueShapes().contains(c3));
+        assertFalse(model.getBlueShapes().contains(c2));
+
+        assertFalse(manager.redo());
+    }
 }

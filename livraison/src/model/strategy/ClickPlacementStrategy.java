@@ -3,11 +3,14 @@ package mvc.model.strategies;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import mvc.model.shapes.Circle;
 import mvc.model.shapes.GameShape;
 import mvc.model.shapes.Rectangle;
 
 public class ClickPlacementStrategy implements ShapeGenerationStrategy {
+    private static final int MIN_DIMENSION = 1;
+    private static final double MIN_RADIUS = 1.0;
 
     @Override
     public List<GameShape> generateShapes(int count, int panelWidth, int panelHeight) {
@@ -29,7 +32,7 @@ public class ClickPlacementStrategy implements ShapeGenerationStrategy {
                 double y = r * stepY;
 
                 if (created % 2 == 0) {
-                    shapes.add(new Rectangle(x - 25, y - 20, 50, 40, Color.RED));
+                    shapes.add(new Rectangle(x - 25.0, y - 20.0, 50, 40, Color.RED));
                 } else {
                     shapes.add(new Circle(x, y, 22, Color.RED));
                 }
@@ -40,16 +43,16 @@ public class ClickPlacementStrategy implements ShapeGenerationStrategy {
     }
 
     public Rectangle createRectangleFromClicks(int startX, int startY, int endX, int endY, Color color) {
-        int width = Math.abs(endX - startX);
-        int height = Math.abs(endY - startY);
+        int width = Math.max(MIN_DIMENSION, (int) Math.abs((double) endX - (double) startX));
+        int height = Math.max(MIN_DIMENSION, (int) Math.abs((double) endY - (double) startY));
         int x = Math.min(startX, endX);
         int y = Math.min(startY, endY);
-        return new Rectangle(x, y, width, height, color);
+        return new Rectangle(x, y, width, height, Objects.requireNonNullElse(color, Color.RED));
     }
 
     public Circle createCircleFromClicks(int centerX, int centerY, int edgeX, int edgeY, Color color) {
-        double radius = Math.sqrt(Math.pow(edgeX - centerX, 2) + Math.pow(edgeY - centerY, 2));
-        return new Circle(centerX, centerY, radius, color);
+        double radius = Math.max(MIN_RADIUS, Math.hypot((double) edgeX - (double) centerX, (double) edgeY - (double) centerY));
+        return new Circle(centerX, centerY, radius, Objects.requireNonNullElse(color, Color.RED));
     }
 
     @Override
