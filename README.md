@@ -23,10 +23,8 @@ java -jar lib/junit-platform-console-standalone-1.10.2.jar --class-path out --sc
 
 
 ## SonarQube 
-
 mvn sonar:sonar \
   -Dsonar.host.url=https://sonarcloud.io \
   -Dsonar.organization=bob239999999 \
   -Dsonar.projectKey=britek2001_MVC \
   -Dsonar.login=46c521ce41ec17c72a887cd33ade3c72a650b299
-  
