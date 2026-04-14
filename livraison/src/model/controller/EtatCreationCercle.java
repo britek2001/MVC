@@ -49,7 +49,7 @@ public class EtatCreationCercle implements EtatInteraction {
             return;
         }
         if (isDragging) {
-            double rayon = Math.hypot(currentX - startX, currentY - startY);
+            double rayon = Math.hypot((double)currentX - (double)startX, (double)currentY - (double)startY);
 
             if (rayon < 10) {
                 endDrag(controller);

@@ -31,20 +31,27 @@ public class CreateShapeCommand implements Command{
         }   
     }
     
+
     @Override
     public void undo(){
         if (created) {
             model.removeBlueShape(shape);
+            created = false;
         }
     }
 
+
     @Override
     public void redo(){
-        if (!created) {
+        if (created) {
             return;
         }
         if (!model.getBlueShapes().contains(shape)) {
-            model.addBlueShape(shape);
+            boolean added = model.addBlueShape(shape);
+            if (added) {
+                created = true;
+                index = model.getBlueShapes().indexOf(shape);
+            }
         }
     }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="mvc.model.view.ViewTest" time="2.465" tests="12" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="mvc.model.view.ViewTest" time="1.583" tests="12" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="19"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -14,7 +14,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="MA"/>
     <property name="sun.boot.library.path" value="/Users/mac/Library/Java/JavaVirtualMachines/openjdk-19.0.1/Contents/Home/lib"/>
-    <property name="sun.java.command" value="/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/target/surefire/surefirebooter-20260414121916044_3.jar /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/target/surefire 2026-04-14T12-19-15_988-jvmRun1 surefire-20260414121916044_1tmp surefire_0-20260414121916044_2tmp"/>
+    <property name="sun.java.command" value="/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/target/surefire/surefirebooter-20260414133058834_3.jar /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/target/surefire 2026-04-14T13-30-58_771-jvmRun1 surefire-20260414133058834_1tmp surefire_0-20260414133058834_2tmp"/>
     <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/target/test-classes:/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/target/classes:/Users/mac/.m2/repository/org/junit/jupiter/junit-jupiter/5.10.0/junit-jupiter-5.10.0.jar:/Users/mac/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.0/junit-jupiter-api-5.10.0.jar:/Users/mac/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/Users/mac/.m2/repository/org/junit/platform/junit-platform-commons/1.10.0/junit-platform-commons-1.10.0.jar:/Users/mac/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/Users/mac/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.10.0/junit-jupiter-params-5.10.0.jar:/Users/mac/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.0/junit-jupiter-engine-5.10.0.jar:/Users/mac/.m2/repository/org/junit/platform/junit-platform-engine/1.10.0/junit-platform-engine-1.10.0.jar:"/>
@@ -31,7 +31,7 @@
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="apple.awt.application.name" value="ForkedBooter"/>
-    <property name="surefire.real.class.path" value="/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/target/surefire/surefirebooter-20260414121916044_3.jar"/>
+    <property name="surefire.real.class.path" value="/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/target/surefire/surefirebooter-20260414133058834_3.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="java.runtime.version" value="19.0.1+10-21"/>
@@ -59,53 +59,53 @@
     <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="java.class.version" value="63.0"/>
   </properties>
-  <testcase name="mainMenuStyleHelpers" classname="mvc.model.view.ViewTest" time="0.944"/>
-  <testcase name="mainMenuDifficultyMapping" classname="mvc.model.view.ViewTest" time="0.004"/>
-  <testcase name="menuShowRejectsNullCallback" classname="mvc.model.view.ViewTest" time="0.003"/>
+  <testcase name="mainMenuStyleHelpers" classname="mvc.model.view.ViewTest" time="0.128"/>
+  <testcase name="mainMenuDifficultyMapping" classname="mvc.model.view.ViewTest" time="0.002"/>
+  <testcase name="menuShowRejectsNullCallback" classname="mvc.model.view.ViewTest" time="0.001"/>
   <testcase name="gameViewControlButtonsFlow" classname="mvc.model.view.ViewTest" time="0.305">
     <system-out><![CDATA[WARNING mouse controller not set
 ]]></system-out>
-    <system-err><![CDATA[abr 14, 2026 12:19:17 P. M. mvc.model.game.GameModel addBlueShape
+    <system-err><![CDATA[abr 14, 2026 1:31:01 P. M. mvc.model.game.GameModel addBlueShape
 INFO: Numero de Blue Shapes: 1/4
-abr 14, 2026 12:19:17 P. M. mvc.model.game.GameModel addBlueShape
+abr 14, 2026 1:31:01 P. M. mvc.model.game.GameModel addBlueShape
 INFO: Score Actuel: 1256
-abr 14, 2026 12:19:17 P. M. mvc.model.commands.CreateShapeCommand execut
-INFO: Shape added: mvc.model.shapes.Circle@5b7a7f33
-abr 14, 2026 12:19:17 P. M. mvc.model.commands.CreateShapeCommand execut
+abr 14, 2026 1:31:01 P. M. mvc.model.commands.CreateShapeCommand execut
+INFO: Shape added: mvc.model.shapes.Circle@821330f
+abr 14, 2026 1:31:01 P. M. mvc.model.commands.CreateShapeCommand execut
 INFO: Index of created shape: 0
 ]]></system-err>
   </testcase>
-  <testcase name="gamePainterPaintNominal" classname="mvc.model.view.ViewTest" time="0.612">
-    <system-err><![CDATA[abr 14, 2026 12:19:18 P. M. mvc.model.game.GameModel addBlueShape
+  <testcase name="gamePainterPaintNominal" classname="mvc.model.view.ViewTest" time="0.552">
+    <system-err><![CDATA[abr 14, 2026 1:31:01 P. M. mvc.model.game.GameModel addBlueShape
 INFO: Numero de Blue Shapes: 1/4
-abr 14, 2026 12:19:18 P. M. mvc.model.game.GameModel addBlueShape
+abr 14, 2026 1:31:01 P. M. mvc.model.game.GameModel addBlueShape
 INFO: Score Actuel: 3200
 ]]></system-err>
   </testcase>
-  <testcase name="gamePainterKeepsRedShapesVisibleDuringInteractionStates" classname="mvc.model.view.ViewTest" time="0.027"/>
+  <testcase name="gamePainterKeepsRedShapesVisibleDuringInteractionStates" classname="mvc.model.view.ViewTest" time="0.031"/>
   <testcase name="menuSelectionRecordStoresValues" classname="mvc.model.view.ViewTest" time="0.0"/>
   <testcase name="themeFactoryAndButtonFactory" classname="mvc.model.view.ViewTest" time="0.074"/>
-  <testcase name="gamePainterDragPreviewBranches" classname="mvc.model.view.ViewTest" time="0.031"/>
-  <testcase name="gameCPanelButtonsAndCallbacks" classname="mvc.model.view.ViewTest" time="0.432"/>
-  <testcase name="gameTutorialPrivateHelpers" classname="mvc.model.view.ViewTest" time="0.018"/>
-  <testcase name="gameViewPrivateHelpers" classname="mvc.model.view.ViewTest" time="0.007">
+  <testcase name="gamePainterDragPreviewBranches" classname="mvc.model.view.ViewTest" time="0.018"/>
+  <testcase name="gameCPanelButtonsAndCallbacks" classname="mvc.model.view.ViewTest" time="0.433"/>
+  <testcase name="gameTutorialPrivateHelpers" classname="mvc.model.view.ViewTest" time="0.017"/>
+  <testcase name="gameViewPrivateHelpers" classname="mvc.model.view.ViewTest" time="0.012">
     <system-out><![CDATA[WARNING mouse controller not set
 ]]></system-out>
-    <system-err><![CDATA[abr 14, 2026 12:19:19 P. M. mvc.model.game.GameModel addBlueShape
+    <system-err><![CDATA[abr 14, 2026 1:31:02 P. M. mvc.model.game.GameModel addBlueShape
 INFO: Numero de Blue Shapes: 1/4
-abr 14, 2026 12:19:19 P. M. mvc.model.game.GameModel addBlueShape
+abr 14, 2026 1:31:02 P. M. mvc.model.game.GameModel addBlueShape
 INFO: Score Actuel: 1963
-abr 14, 2026 12:19:19 P. M. mvc.model.commands.CreateShapeCommand execut
-INFO: Shape added: mvc.model.shapes.Circle@11d8ae8b
-abr 14, 2026 12:19:19 P. M. mvc.model.commands.CreateShapeCommand execut
+abr 14, 2026 1:31:02 P. M. mvc.model.commands.CreateShapeCommand execut
+INFO: Shape added: mvc.model.shapes.Circle@26df6e3a
+abr 14, 2026 1:31:02 P. M. mvc.model.commands.CreateShapeCommand execut
 INFO: Index of created shape: 0
-abr 14, 2026 12:19:19 P. M. mvc.model.game.GameModel addBlueShape
+abr 14, 2026 1:31:02 P. M. mvc.model.game.GameModel addBlueShape
 INFO: Numero de Blue Shapes: 2/4
-abr 14, 2026 12:19:19 P. M. mvc.model.game.GameModel addBlueShape
+abr 14, 2026 1:31:02 P. M. mvc.model.game.GameModel addBlueShape
 INFO: Score Actuel: 3763
-abr 14, 2026 12:19:19 P. M. mvc.model.commands.CreateShapeCommand execut
-INFO: Shape added: mvc.model.shapes.Rectangle@479cbee5
-abr 14, 2026 12:19:19 P. M. mvc.model.commands.CreateShapeCommand execut
+abr 14, 2026 1:31:02 P. M. mvc.model.commands.CreateShapeCommand execut
+INFO: Shape added: mvc.model.shapes.Rectangle@4a3631f8
+abr 14, 2026 1:31:02 P. M. mvc.model.commands.CreateShapeCommand execut
 INFO: Index of created shape: 1
 ]]></system-err>
   </testcase>

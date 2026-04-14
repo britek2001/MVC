@@ -1,7 +1,0 @@
-organization=bob239999999
-projectKey=britek2001_MVC
-serverUrl=https://sonarcloud.io
-serverVersion=8.0.0.85336
-dashboardUrl=https://sonarcloud.io/dashboard?id=britek2001_MVC
-ceTaskId=AZ2LgTjF4G1kVLBOQfDL
-ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZ2LgTjF4G1kVLBOQfDL

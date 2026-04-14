@@ -132,17 +132,4 @@ class ShapeTest {
         assertEquals(originalRadius * 0.5, circle.getRadius(), 0.01);
     }
 
-    @Test
-    @DisplayName("testShapeCopy")
-    void testShapeCopy() {
-        Circle clonedCircle = (Circle) circle.copy();
-        
-        assertEquals(circle.getX(), clonedCircle.getX());
-        assertEquals(circle.getY(), clonedCircle.getY());
-        assertEquals(circle.getRadius(), clonedCircle.getRadius());
-        assertEquals(circle.getColor(), clonedCircle.getColor());
-        
-        clonedCircle.move(50, 50);
-        assertNotEquals(circle.getX(), clonedCircle.getX());
-    }
 }

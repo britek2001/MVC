@@ -1,4 +1,5 @@
 package mvc.model.commands;
+
 import mvc.model.game.GameModel;
 import mvc.model.shapes.GameShape;
 import java.util.logging.Logger;

@@ -67,9 +67,6 @@ public class GameCPanel extends JPanel {
         JButton eliminateSelectedButton = createSquareButton("X", onDeleteSelected);
         JButton undoButton = createSquareButton("<-", onUndo);
         JButton redoButton = createSquareButton("->", onRedo);
-        JButton validateButton = onValidateTurn != null
-            ? createSquareButton("OK", onValidateTurn)
-            : null;
         JButton endGameButton = createSquareButton(" Finish ", onEndGame);
         endGameButton.setPreferredSize(new Dimension(FINISH_BUTTON_WIDTH, BUTTON_SIZE));
         endGameButton.setMinimumSize(new Dimension(FINISH_BUTTON_WIDTH, BUTTON_SIZE));
@@ -80,9 +77,6 @@ public class GameCPanel extends JPanel {
         add(eliminateSelectedButton);
         add(undoButton);
         add(redoButton);
-        if (validateButton != null) {
-            add(validateButton);
-        }
         add(endGameButton);
     }
 
