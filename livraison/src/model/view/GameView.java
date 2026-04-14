@@ -367,10 +367,89 @@ public class GameView extends JPanel implements Observer {
             dialog.setLayout(new BorderLayout(12, 12));
             dialog.getContentPane().setBackground(popupBg);
 
-            JPanel content = buildResultContent(popupText, popupAccent, popupBg);
+            JPanel content = new JPanel();
+            content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+            content.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+            content.setBackground(popupBg);
+
+            if (model.isTwoPlayerMode()) {
+                String winnerName = model.isGameWon() ? model.getRedPlayerName() : model.getBluePlayerName();
+                JLabel winnerLabel = new JLabel("Gagnant: " + winnerName);
+                winnerLabel.setAlignmentX(LEFT_ALIGNMENT);
+                stylePopupLabel(winnerLabel, popupText);
+                
+                JLabel redScoreLabel = new JLabel(model.getRedPlayerName() + " score: " + model.getRedPlayerScore());
+                redScoreLabel.setAlignmentX(LEFT_ALIGNMENT);
+                stylePopupLabel(redScoreLabel, popupText);
+                
+                JLabel blueScoreLabel = new JLabel(model.getBluePlayerName() + " score: " + model.getBluePlayerScore());
+                blueScoreLabel.setAlignmentX(LEFT_ALIGNMENT);
+                stylePopupLabel(blueScoreLabel, popupText);
+
+                content.add(winnerLabel);
+                content.add(Box.createVerticalStrut(8));
+                content.add(redScoreLabel);
+                content.add(Box.createVerticalStrut(4));
+                content.add(blueScoreLabel);
+            } else {
+                JLabel resultLabel = new JLabel(model.isGameWon() ? "Victoire !" : "Defaite !");
+                resultLabel.setAlignmentX(LEFT_ALIGNMENT);
+                stylePopupLabel(resultLabel, popupText);
+                JLabel scoreLabel = new JLabel("Score = espace couvert: " + model.getFinalCoveredArea());
+                scoreLabel.setAlignmentX(LEFT_ALIGNMENT);
+                stylePopupLabel(scoreLabel, popupText);
+                JLabel shapesLabel = new JLabel("Formes posées: " + model.getBlueShapesPlacedThisLevel() + "/" + model.getBlueShapesPerLevel());
+                shapesLabel.setAlignmentX(LEFT_ALIGNMENT);
+                stylePopupLabel(shapesLabel, popupText);
+                JLabel magistralLabel = new JLabel("VICTOIRE MAGISTRAL");
+                magistralLabel.setAlignmentX(LEFT_ALIGNMENT);
+                stylePopupLabel(magistralLabel, popupAccent);
+
+                content.add(resultLabel);
+                content.add(Box.createVerticalStrut(8));
+                if (model.isMagistralWin()) {
+                    content.add(magistralLabel);
+                    content.add(Box.createVerticalStrut(4));
+                } else {
+                    content.add(scoreLabel);
+                    content.add(Box.createVerticalStrut(4));
+                }
+                content.add(shapesLabel);
+            }
+
             JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             buttons.setBackground(popupBg);
-            addResultButtons(dialog, buttons, popupAccent, popupText);
+            if (model.canStartNextLevel()) {
+                JButton nextLevelButton = new JButton("Niveau supérieur");
+                stylePopupButton(nextLevelButton, popupAccent, popupText);
+                nextLevelButton.addActionListener(evt -> {
+                    dialog.dispose();
+                    boolean started = model.startNextLevel();
+                    if (started) {
+                        gameResultShown = false;
+                        selectedShape = null;
+                        repaint();
+                    }
+                });
+                buttons.add(nextLevelButton);
+            }
+
+            JButton returnButton = new JButton("Retourner");
+            stylePopupButton(returnButton, new Color(100, 45, 150), Color.BLACK);
+            returnButton.addActionListener(evt -> {
+                dialog.dispose();
+                onEndGame.run();
+            });
+
+            JButton exitButton = new JButton("Exit");
+            stylePopupButton(exitButton, new Color(100, 45, 150), Color.BLACK);
+            exitButton.addActionListener(evt -> {
+                dialog.dispose();
+                onEndGame.run();
+            });
+
+            buttons.add(returnButton);
+            buttons.add(exitButton);
 
             dialog.add(content, BorderLayout.CENTER);
             dialog.add(buttons, BorderLayout.SOUTH);
@@ -381,104 +460,6 @@ public class GameView extends JPanel implements Observer {
         });
     }
 
-    private JPanel buildResultContent(Color popupText, Color popupAccent, Color popupBg) {
-        JPanel content = new JPanel();
-        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-        content.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
-        content.setBackground(popupBg);
-
-        if (model.isTwoPlayerMode()) {
-            addTwoPlayerResultContent(content, popupText);
-        } else {
-            addSinglePlayerResultContent(content, popupText, popupAccent);
-        }
-        return content;
-    }
-
-    private void addTwoPlayerResultContent(JPanel content, Color popupText) {
-        String winnerName = model.isGameWon() ? model.getRedPlayerName() : model.getBluePlayerName();
-        JLabel winnerLabel = new JLabel("Gagnant: " + winnerName);
-        winnerLabel.setAlignmentX(LEFT_ALIGNMENT);
-        stylePopupLabel(winnerLabel, popupText);
-
-        JLabel redScoreLabel = new JLabel(model.getRedPlayerName() + " score: " + model.getRedPlayerScore());
-        redScoreLabel.setAlignmentX(LEFT_ALIGNMENT);
-        stylePopupLabel(redScoreLabel, popupText);
-
-        JLabel blueScoreLabel = new JLabel(model.getBluePlayerName() + " score: " + model.getBluePlayerScore());
-        blueScoreLabel.setAlignmentX(LEFT_ALIGNMENT);
-        stylePopupLabel(blueScoreLabel, popupText);
-
-        content.add(winnerLabel);
-        content.add(Box.createVerticalStrut(8));
-        content.add(redScoreLabel);
-        content.add(Box.createVerticalStrut(4));
-        content.add(blueScoreLabel);
-    }
-
-    private void addSinglePlayerResultContent(JPanel content, Color popupText, Color popupAccent) {
-        JLabel resultLabel = new JLabel(model.isGameWon() ? "Victoire !" : "Defaite !");
-        resultLabel.setAlignmentX(LEFT_ALIGNMENT);
-        stylePopupLabel(resultLabel, popupText);
-
-        JLabel scoreLabel = new JLabel("Score = espace couvert: " + model.getFinalCoveredArea());
-        scoreLabel.setAlignmentX(LEFT_ALIGNMENT);
-        stylePopupLabel(scoreLabel, popupText);
-
-        JLabel shapesLabel = new JLabel("Formes posées: " + model.getBlueShapesPlacedThisLevel() + "/" + model.getBlueShapesPerLevel());
-        shapesLabel.setAlignmentX(LEFT_ALIGNMENT);
-        stylePopupLabel(shapesLabel, popupText);
-
-        JLabel magistralLabel = new JLabel("VICTOIRE MAGISTRAL");
-        magistralLabel.setAlignmentX(LEFT_ALIGNMENT);
-        stylePopupLabel(magistralLabel, popupAccent);
-
-        content.add(resultLabel);
-        content.add(Box.createVerticalStrut(8));
-        if (model.isMagistralWin()) {
-            content.add(magistralLabel);
-            content.add(Box.createVerticalStrut(4));
-        } else {
-            content.add(scoreLabel);
-            content.add(Box.createVerticalStrut(4));
-        }
-        content.add(shapesLabel);
-    }
-
-    private void addResultButtons(JDialog dialog, JPanel buttons, Color popupAccent, Color popupText) {
-        if (model.canStartNextLevel()) {
-            JButton nextLevelButton = new JButton("Niveau supérieur");
-            stylePopupButton(nextLevelButton, popupAccent, popupText);
-            nextLevelButton.addActionListener(evt -> {
-                dialog.dispose();
-                boolean started = model.startNextLevel();
-                if (started) {
-                    gameResultShown = false;
-                    selectedShape = null;
-                    repaint();
-                }
-            });
-            buttons.add(nextLevelButton);
-        }
-
-        JButton returnButton = new JButton("Retourner");
-        stylePopupButton(returnButton, new Color(100, 45, 150), popupText);
-        returnButton.addActionListener(evt -> {
-            dialog.dispose();
-            onEndGame.run();
-        });
-
-        JButton exitButton = new JButton("Exit");
-        stylePopupButton(exitButton, new Color(100, 45, 150), popupText);
-        exitButton.addActionListener(evt -> {
-            dialog.dispose();
-            onEndGame.run();
-        });
-
-        buttons.add(returnButton);
-        buttons.add(exitButton);
-    }
-
     private void stylePopupLabel(JLabel label, Color textColor) {
         label.setForeground(textColor);
         label.setFont(new Font("Monospaced", Font.BOLD, 13));
@@ -486,7 +467,7 @@ public class GameView extends JPanel implements Observer {
 
     private void stylePopupButton(JButton button, Color background, Color foreground) {
         button.setBackground(background);
-        button.setForeground(Color.BLACK);
+        button.setForeground(foreground);
         button.setFocusPainted(false);
         button.setFont(new Font("Monospaced", Font.BOLD, 11));
     }

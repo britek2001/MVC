@@ -41,7 +41,6 @@
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/controller/EtatResizeShape.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/strategy/ClickPlacementStrategy.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/view/theme/StyledButtonFactory.java
-/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/game/ai/AIPlayPhase.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/observer/observable.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/view/theme/ThemeStrategyFactory.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/commands/ResizeShapeCommand.java
@@ -54,6 +53,5 @@
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/game/flow/GamePhase.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/view/theme/ThemeStrategy.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/game/turn/TurnSignal.java
-/Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/games/Player.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/controller/EtatCreationCercle.java
 /Users/mac/JIJI/britel-abdelkerim-lee/MVC/livraison/src/model/controller/EtatSelection.java

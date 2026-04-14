@@ -1,15 +1,14 @@
 package mvc;
-import mvc.model.game.LevelConfig;
-import mvc.model.game.ai.AIPlayPhase;
-import mvc.model.game.flow.GameFlowBuilder;
 import mvc.model.game.flow.ShowObstaclesPhase;
 import mvc.model.game.flow.PlayerPlayPhase;
 import mvc.model.game.flow.CalculateScorePhase;
+import mvc.model.game.flow.GameFlowBuilder;
 import mvc.model.commands.*;
 import mvc.model.controller.ControleurSouris;
 import mvc.model.controller.EtatSelection;
 import mvc.model.shapes.GameShape;
 import mvc.model.game.GameModel;
+import mvc.model.game.LevelConfig;
 import mvc.model.game.turn.TurnCoordinator;
 import mvc.model.game.turn.PlayerTurnState;
 import mvc.model.strategies.ShapeGenerationStrategy;
@@ -28,7 +27,6 @@ public class Main {
     private static final int WINDOW_WIDTH = 1180;
     private static final int WINDOW_HEIGHT = 890;
     private static final int INFO_PANEL_WIDTH = 400;
-    private static List<Command> commandHistory = new ArrayList<>();
     private enum CommandType {
         CREATE,
         DELETE,
@@ -168,7 +166,6 @@ public class Main {
         }
         GameFlowBuilder flow = new GameFlowBuilder()
             .addPhase(new ShowObstaclesPhase())
-            .addPhase(new AIPlayPhase())
             .addPhase(new PlayerPlayPhase())
             .addPhase(new CalculateScorePhase());
 
@@ -176,27 +173,4 @@ public class Main {
         logger.info("Score final: " + game.getTotalScore());
     }
 
-    private static Command executeCommand(CommandType type, GameModel game, GameShape shape, double value1, double value2) {
-        Command command;
-
-        switch (type) {
-            case CREATE:
-                command = new CreateShapeCommand(game, shape);
-                break;
-            case DELETE:
-                command = new DeleteShapeCommand(game, shape);
-                break;
-            case MOVE:
-                command = new MoveShapeCommand(game, shape, shape.getX(), shape.getY(), value1, value2);
-                break;
-            case RESIZE:
-                command = new ResizeShapeCommand(game, shape, value1, value2);
-                break;
-            default:
-                throw new IllegalArgumentException("Pas suporter: " + type);
-        }
-        command.execut();
-        commandHistory.add(command);
-        return command;
-    }
 }

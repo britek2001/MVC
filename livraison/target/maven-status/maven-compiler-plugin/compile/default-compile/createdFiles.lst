@@ -25,7 +25,6 @@ mvc/model/game/flow/PlayerPlayPhase.class
 mvc/model/game/GameModel$2.class
 mvc/model/game/GameState.class
 mvc/model/view/theme/ThemeManager.class
-mvc/model/game/ai/AIPlayPhase.class
 mvc/model/game/turn/PlayerTurnState.class
 mvc/model/view/GameCPanel$ShapeType.class
 mvc/model/view/theme/ThemeStrategyFactory.class
@@ -41,7 +40,6 @@ mvc/model/game/ai/AIShapeGenerationPhase.class
 mvc/model/commands/ResizeShapeCommand.class
 Observateur.class
 mvc/model/view/MainMenuView.class
-mvc/Main$1.class
 mvc/model/game/ai/AIGenerateShapesPhase.class
 mvc/model/strategies/ShapeGenerationStrategy.class
 mvc/model/strategies/ClickPlacementStrategy.class
@@ -56,7 +54,6 @@ mvc/model/view/GameTutorialView$1.class
 mvc/model/controller/EtatCreationRectangle.class
 mvc/model/commands/DeleteShapeCommand.class
 mvc/model/view/theme/ThemeStrategy.class
-mvc/model/game/Player.class
 mvc/model/controller/EtatCreationCercle.class
 mvc/model/view/GameTutorialView.class
 mvc/model/game/GameModel$1.class

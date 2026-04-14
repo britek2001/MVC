@@ -2,6 +2,7 @@ package mvc.model.view;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -18,6 +19,7 @@ import mvc.model.controller.ControleurSouris;
 import mvc.model.controller.EtatCreationCercle;
 import mvc.model.controller.EtatCreationRectangle;
 import mvc.model.game.GameModel;
+import mvc.model.game.GameState;
 import mvc.model.shapes.Circle;
 import mvc.model.shapes.GameShape;
 import mvc.model.shapes.Rectangle;
@@ -193,6 +195,39 @@ class ViewTest {
 
 		assertTrue(etatRect.isDragging());
 		assertTrue(etatCircle.isDragging());
+	}
+
+	@Test
+	@DisplayName("gamePainterKeepsRedShapesVisibleDuringInteractionStates")
+	void gamePainterKeepsRedShapesVisibleDuringInteractionStates() {
+		GameModel model = new GameModel();
+		model.setGameAreaSize(900, 700);
+		model.getRedShapes().add(new Circle(120, 120, 24, java.awt.Color.RED));
+		model.showRedShapes();
+
+		GamePainter painter = new GamePainter();
+		GameState[] interactionStates = {
+				GameState.MOVING_SHAPE,
+				GameState.RESIZING_SHAPE,
+				GameState.MOVE_INVALID_INTERSECTION,
+				GameState.MOVE_INVALID_BOUNDS,
+				GameState.RESIZE_INVALID_INTERSECTION,
+				GameState.RESIZE_INVALID_BOUNDS
+		};
+
+		for (GameState state : interactionStates) {
+			model.setState(state);
+			BufferedImage image = new BufferedImage(1200, 700, BufferedImage.TYPE_INT_ARGB);
+			Graphics2D g2 = image.createGraphics();
+			g2.setClip(0, 0, 1200, 700);
+			painter.paint(g2, model, null, null, null);
+			g2.dispose();
+
+			Color rendered = new Color(image.getRGB(120, 120), true);
+			assertEquals(java.awt.Color.RED.getRed(), rendered.getRed(), "Red component must stay visible in state " + state);
+			assertEquals(java.awt.Color.RED.getGreen(), rendered.getGreen(), "Green component must stay visible in state " + state);
+			assertEquals(java.awt.Color.RED.getBlue(), rendered.getBlue(), "Blue component must stay visible in state " + state);
+		}
 	}
 
 	@Test

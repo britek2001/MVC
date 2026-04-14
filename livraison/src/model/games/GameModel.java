@@ -704,7 +704,6 @@ public class GameModel extends Observable {
             return;
         }
 
-        // One timeout task per level: cancel previous level timer before starting a new one.
         if (levelGameTimeoutTask != null) {
             levelGameTimeoutTask.cancel();
         }
@@ -756,7 +755,6 @@ public class GameModel extends Observable {
                     break;
                 }
             }
-
             attempts++;
         }
 

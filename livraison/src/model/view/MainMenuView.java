@@ -78,8 +78,7 @@ public class MainMenuView {
             gbc.anchor = GridBagConstraints.WEST;
             gbc.insets = new Insets(0, 0, 10, 0);
             gbc.fill = GridBagConstraints.HORIZONTAL;
-
-            JLabel titleLabel = new JLabel("RETRO GAME MENU");
+            JLabel titleLabel = new JLabel("MAX GAME - MENU");
             titleLabel.setFont(RETRO_TITLE_FONT);
             titleLabel.setForeground(RETRO_NEON_PINK);
             panel.add(titleLabel, gbc);

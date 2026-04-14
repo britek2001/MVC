@@ -47,7 +47,13 @@ public class GamePainter {
         if (model.areRedShapesVisible() && (state == GameState.RED_VISIBLE
             || state == GameState.WAITING_FOR_RED
             || state == GameState.LEVEL_COMPLETE
-            || state == GameState.PLACING_BLUE)) {
+            || state == GameState.PLACING_BLUE
+            || state == GameState.MOVING_SHAPE
+            || state == GameState.RESIZING_SHAPE
+            || state == GameState.MOVE_INVALID_INTERSECTION
+            || state == GameState.MOVE_INVALID_BOUNDS
+            || state == GameState.RESIZE_INVALID_INTERSECTION
+            || state == GameState.RESIZE_INVALID_BOUNDS)) {
             model.getRedShapes().forEach(shape -> drawShape(gameAreaGraphics, shape, selectedShape));
         }
 
@@ -174,15 +180,15 @@ public class GamePainter {
         g2.drawString("Compteur: " + model.getBlueShapesPlacedThisLevel() + "/" + model.getBlueShapesPerLevel(), infoX, 108);
         g2.drawString("Rouges: " + model.getRedShapes().size(), infoX, 132);
         g2.drawString("Niveau: " + model.getLevel(), infoX, 156);
-        g2.drawString("Temps partie (60s): " + String.format("%.1f", remainingGameSeconds) + " s", infoX, 180);
         g2.drawString("Objectif: " + model.getBlueShapesPerLevel() + " formes", infoX, 204);
         g2.drawString("Restantes: " + model.getBlueShapesRemainingForLevel(), infoX, 228);
-        g2.drawString("Temps niveau: " + String.format("%.1f", remainingLevelSeconds) + " s", infoX, 252);
 
         int barX = infoX;
-        int barY = 270;
+        int barY = 272;
         int barWidth = 220;
         int barHeight = 18;
+
+        g2.drawString("Temps partie: " + String.format("%.1f", remainingGameSeconds) + " s", barX, barY - 10);
         g2.setColor(theme.getSeparatorColor());
         g2.fillRoundRect(barX, barY, barWidth, barHeight, arc, arc);
         g2.setColor(getCountdownColor(gameRatio));
@@ -190,7 +196,10 @@ public class GamePainter {
         g2.setColor(theme.getHudCardBorderColor());
         g2.drawRoundRect(barX, barY, barWidth, barHeight, arc, arc);
 
-        int levelBarY = barY + 30;
+        int levelLabelY = barY + 50;
+        int levelBarY = barY + 60;
+        g2.setColor(Color.BLACK);
+        g2.drawString("Temps disparition des figures: " + String.format("%.1f", remainingLevelSeconds) + " s", barX, levelLabelY);
         g2.setColor(theme.getSeparatorColor());
         g2.fillRoundRect(barX, levelBarY, barWidth, barHeight, arc, arc);
         g2.setColor(getCountdownColor(levelRatio));
@@ -200,11 +209,12 @@ public class GamePainter {
 
         if (model.isTwoPlayerMode()) {
             g2.setColor(theme.getHudMutedTextColor());
-            g2.drawString("Mode: 2 joueurs", infoX, cardY + 330);
-            g2.drawString("Tour: " + model.getCurrentPlayerName() + " [" + model.getCurrentPlayerColorLabel() + "]", infoX, cardY + 354);
-            g2.drawString("Tours: " + model.getTurnsPlayed() + "/" + (model.getMaxTurnsPerPlayer() * 2), infoX, cardY + 378);
-            g2.drawString(model.getRedPlayerName() + " score: " + model.getRedPlayerScore(), infoX, cardY + 402);
-            g2.drawString(model.getBluePlayerName() + " score: " + model.getBluePlayerScore(), infoX, cardY + 426);
+            int modeStartY = Math.max(levelBarY + 44, cardY + 330);
+            g2.drawString("Mode: 2 joueurs", infoX, modeStartY);
+            g2.drawString("Tour: " + model.getCurrentPlayerName() + " [" + model.getCurrentPlayerColorLabel() + "]", infoX, modeStartY + 24);
+            g2.drawString("Tours: " + model.getTurnsPlayed() + "/" + (model.getMaxTurnsPerPlayer() * 2), infoX, modeStartY + 48);
+            g2.drawString(model.getRedPlayerName() + " score: " + model.getRedPlayerScore(), infoX, modeStartY + 72);
+            g2.drawString(model.getBluePlayerName() + " score: " + model.getBluePlayerScore(), infoX, modeStartY + 96);
         }
     }
 

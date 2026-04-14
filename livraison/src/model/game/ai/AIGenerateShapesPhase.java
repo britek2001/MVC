@@ -29,9 +29,9 @@ public class AIGenerateShapesPhase extends AIShapeGenerationPhase {
                 generatedShapes.add(candidate);
                 logger.info("AI: Figure " + (generatedShapes.size()) + " added - " + candidate.getClass().getSimpleName());
             }
+            logger.warning("AI: ATTEMPT " + (attempts + 1) + " failed");
             attempts++;
         }
-
         logger.info("AI: Generer " + generatedShapes.size() + " figures in " + attempts + " attempts");
         return generatedShapes;
     }
@@ -77,10 +77,12 @@ public class AIGenerateShapesPhase extends AIShapeGenerationPhase {
     }
 
     private GameShape createRandomShape(int attempts, int targetCount, int placedCount, int panelWidth, int panelHeight, double adjustedSize) {
+        
         int minY = Math.min(TOP_SAFE_MARGIN, Math.max(0, panelHeight - 1));
         int usableWidth = Math.max(1, panelWidth);
         int usableHeight = Math.max(1, panelHeight - minY);
-
+        
+        // Ponderation to increase chance 
         boolean tightSpace = usableWidth < 360 || usableHeight < 260 || random.nextDouble() < 0.35;
         double attemptPressure = Math.min(1.0, attempts / 1000.0);
         double progress = targetCount <= 0 ? 0.0 : (placedCount / (double) targetCount);

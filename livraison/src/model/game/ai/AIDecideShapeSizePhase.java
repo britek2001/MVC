@@ -17,12 +17,8 @@ public class AIDecideShapeSizePhase extends AIShapeGenerationPhase {
     protected List<GameShape> generateShapes(GameModel model, int count, int panelWidth, int panelHeight) {
 
         boolean redVisible = model.areRedShapesVisible();
-        logger.info("AI: Figure Rouge visible = " + redVisible);
-
         int availableWidth = calculateAvailableWidth(model, panelWidth);
         int availableHeight = calculateAvailableHeight(model, panelHeight);
-
-        logger.info("AI: Espace disponible = " + availableWidth + "x" + availableHeight);
 
         double spacePressure = calculateSpacePressure(availableWidth, availableHeight);
         logger.info("AI: Espace de pression = " + String.format("%.2f", spacePressure));
