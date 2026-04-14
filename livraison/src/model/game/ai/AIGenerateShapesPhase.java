@@ -1,5 +1,4 @@
 package mvc.model.game.ai;
-
 import java.awt.Color;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -21,9 +20,10 @@ public class AIGenerateShapesPhase extends AIShapeGenerationPhase {
 
         List<GameShape> generatedShapes = new ArrayList<>();
         int attempts = 0;
+        double adjustedSize = calculateAdjustedSize(panelWidth, panelHeight, Math.max(1, count));
 
         while (generatedShapes.size() < count && attempts < 1000) {
-            GameShape candidate = createRandomShape(attempts, count, generatedShapes.size(), panelWidth, panelHeight);
+            GameShape candidate = createRandomShape(attempts, count, generatedShapes.size(), panelWidth, panelHeight, adjustedSize);
 
             if (isValidAgainstRedShapes(candidate, model)
                     && isValidAgainstOtherShapes(candidate, generatedShapes)
@@ -36,6 +36,19 @@ public class AIGenerateShapesPhase extends AIShapeGenerationPhase {
 
         logger.info("AI: Generer " + generatedShapes.size() + " figures in " + attempts + " attempts");
         return generatedShapes;
+    }
+
+    private double calculateAdjustedSize(int panelWidth, int panelHeight, int count) {
+        int availableWidth = Math.max(1, panelWidth - 50);
+        int availableHeight = Math.max(1, panelHeight - TOP_SAFE_MARGIN - 50);
+        double spacePressure = calculateSpacePressure(availableWidth, availableHeight);
+        double area = (double) availableWidth * availableHeight;
+        double baseSize = Math.sqrt(area / count);
+        return Math.max(10.0, baseSize * (1.0 - spacePressure * 0.5));
+    }
+
+    private double calculateSpacePressure(int width, int height) {
+        return Math.max(0.0, 1.0 - ((width * height) / 500000.0));
     }
 
     private boolean isValidAgainstRedShapes(GameShape candidate, GameModel model) {
@@ -65,7 +78,7 @@ public class AIGenerateShapesPhase extends AIShapeGenerationPhase {
         return true;
     }
 
-    private GameShape createRandomShape(int attempts, int targetCount, int placedCount, int panelWidth, int panelHeight) {
+    private GameShape createRandomShape(int attempts, int targetCount, int placedCount, int panelWidth, int panelHeight, double adjustedSize) {
         int minY = Math.min(TOP_SAFE_MARGIN, Math.max(0, panelHeight - 1));
         int usableWidth = Math.max(1, panelWidth);
         int usableHeight = Math.max(1, panelHeight - minY);
@@ -75,31 +88,32 @@ public class AIGenerateShapesPhase extends AIShapeGenerationPhase {
         double progress = targetCount <= 0 ? 0.0 : (placedCount / (double) targetCount);
         boolean aggressive = attemptPressure > 0.35 || progress > 0.5;
         boolean ultraAggressive = attemptPressure > 0.7;
+        double sizeFactor = adjustedSize / 40.0;
 
         int type = random.nextInt(2);
 
         if (type == 0) {
-            return createRectangle(ultraAggressive, aggressive, tightSpace, minY, panelWidth, panelHeight);
+            return createRectangle(ultraAggressive, aggressive, tightSpace, minY, panelWidth, panelHeight, sizeFactor);
         } else {
-            return createCircle(ultraAggressive, aggressive, tightSpace, minY, panelWidth, panelHeight);
+            return createCircle(ultraAggressive, aggressive, tightSpace, minY, panelWidth, panelHeight, sizeFactor);
         }
     }
 
-    private Rectangle createRectangle(boolean ultraAggressive, boolean aggressive, boolean tightSpace, int minY, int panelWidth, int panelHeight) {
+    private Rectangle createRectangle(boolean ultraAggressive, boolean aggressive, boolean tightSpace, int minY, int panelWidth, int panelHeight, double sizeFactor) {
         int rectW;
         int rectH;
         if (ultraAggressive) {
-            rectW = 14 + random.nextInt(13);
-            rectH = 10 + random.nextInt(11);
+            rectW = scaledDimension(14, 13, sizeFactor);
+            rectH = scaledDimension(10, 11, sizeFactor);
         } else if (aggressive) {
-            rectW = 18 + random.nextInt(20);
-            rectH = 12 + random.nextInt(16);
+            rectW = scaledDimension(18, 20, sizeFactor);
+            rectH = scaledDimension(12, 16, sizeFactor);
         } else if (tightSpace) {
-            rectW = 24 + random.nextInt(33);
-            rectH = 18 + random.nextInt(25);
+            rectW = scaledDimension(24, 33, sizeFactor);
+            rectH = scaledDimension(18, 25, sizeFactor);
         } else {
-            rectW = 44 + random.nextInt(33);
-            rectH = 30 + random.nextInt(21);
+            rectW = scaledDimension(44, 33, sizeFactor);
+            rectH = scaledDimension(30, 21, sizeFactor);
         }
 
         int maxX = Math.max(1, panelWidth - rectW);
@@ -109,16 +123,16 @@ public class AIGenerateShapesPhase extends AIShapeGenerationPhase {
         return new Rectangle(x, y, rectW, rectH, Color.BLUE);
     }
 
-    private Circle createCircle(boolean ultraAggressive, boolean aggressive, boolean tightSpace, int minY, int panelWidth, int panelHeight) {
+    private Circle createCircle(boolean ultraAggressive, boolean aggressive, boolean tightSpace, int minY, int panelWidth, int panelHeight, double sizeFactor) {
         int radius;
         if (ultraAggressive) {
-            radius = 6 + random.nextInt(6);
+            radius = scaledDimension(6, 6, sizeFactor);
         } else if (aggressive) {
-            radius = 8 + random.nextInt(8);
+            radius = scaledDimension(8, 8, sizeFactor);
         } else if (tightSpace) {
-            radius = 10 + random.nextInt(11);
+            radius = scaledDimension(10, 11, sizeFactor);
         } else {
-            radius = 16 + random.nextInt(13);
+            radius = scaledDimension(16, 13, sizeFactor);
         }
 
         int minX = radius;
@@ -130,5 +144,10 @@ public class AIGenerateShapesPhase extends AIShapeGenerationPhase {
         int y = minCY + random.nextInt(Math.max(1, maxCY - minCY));
 
         return new Circle(x, y, radius, Color.BLUE);
+    }
+
+    private int scaledDimension(int base, int variation, double sizeFactor) {
+        double scaled = (base + random.nextInt(Math.max(1, variation))) * sizeFactor;
+        return Math.max(5, (int) Math.round(scaled));
     }
 }

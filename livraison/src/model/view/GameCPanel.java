@@ -17,7 +17,7 @@ import mvc.model.view.theme.ThemeStrategy;
 
 public class GameCPanel extends JPanel {
 
-    private final GameModel model;
+    private transient final GameModel model;
     private transient ThemeStrategy theme;
     private final StyledButtonFactory buttonFactory;
     private static final int BUTTON_SIZE = 56;

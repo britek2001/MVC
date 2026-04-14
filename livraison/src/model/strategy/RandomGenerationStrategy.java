@@ -3,12 +3,12 @@ import mvc.model.shapes.GameShape;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.security.SecureRandom;
 import mvc.model.shapes.Rectangle;
 import mvc.model.shapes.Circle;
 
 public class RandomGenerationStrategy implements ShapeGenerationStrategy {
-    private Random random = new Random();
+    private final SecureRandom random = new SecureRandom();
     
     @Override
     public List<GameShape> generateShapes(int count, int panelWidth, int panelHeight) {

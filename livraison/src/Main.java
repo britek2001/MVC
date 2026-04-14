@@ -97,59 +97,83 @@ public class Main {
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
 
-            if (MainMenuView.STRATEGY_TWO_PLAYERS.equals(strategyLabel)) {
-                Thread turnWaitThread = new Thread(() -> {
-                    try {
-                        while (!game.isGameFinished()) {
-                            turnCoordinator.awaitState(PlayerTurnState.HUMAN_GUI);
-                            turnCoordinator.awaitTurnCompletion();
-                        }
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                }, "turn-wait-thread");
-                turnWaitThread.setDaemon(true);
-                turnWaitThread.start();
-            }
+            startTurnWaitThreadIfNeeded(game, strategyLabel, turnCoordinator);
 
             SwingUtilities.invokeLater(() -> {
-                int realGameAreaWidth = Math.max(1, view.getWidth() - INFO_PANEL_WIDTH);
-                int realGameAreaHeight = Math.max(1, view.getHeight());
-                game.setGameAreaSize(realGameAreaWidth, realGameAreaHeight);
-
-                if (MainMenuView.STRATEGY_RANDOM.equals(strategyLabel)) {
-                    logger.info("Lancement variante simple (" + config.timeSeconds + " secondes visibles)");
-                    game.generateRedShapes(config.redShapeCount, realGameAreaWidth, realGameAreaHeight);
-                    GameFlowBuilder flow = GameFlowBuilder.createDefaultFlow();
-                    flow.executeFlow(game);
-                    logger.info("Score final: " + game.getTotalScore());
-                } else if (MainMenuView.STRATEGY_TWO_PLAYERS.equals(strategyLabel)) {
-                    logger.info("Lancement variante avec mémorisation (" + config.timeSeconds + " secondes)");
-                    game.generateRedShapes(config.redShapeCount, realGameAreaWidth, realGameAreaHeight);
-                    GameFlowBuilder flow = GameFlowBuilder.createVariantWithWait(config.timeSeconds * 1000L);
-                    flow.executeFlow(game);
-                    logger.info("Score final: " + game.getTotalScore());
-                } else if (MainMenuView.STRATEGY_AI.equals(strategyLabel)) {
-                    logger.info("Lancement variante IA (Intelligence Artificielle)");
-                    game.generateRedShapes(config.redShapeCount, realGameAreaWidth, realGameAreaHeight);
-                    // Provide game model context to AI strategy
-                    if (aiStrategy != null) {
-                        aiStrategy.setGameModel(game);
-                        logger.info("AI: GameModel context provided to AI strategy");
-                    }
-                    GameFlowBuilder flow = new GameFlowBuilder()
-                        .addPhase(new ShowObstaclesPhase())
-                        .addPhase(new AIPlayPhase())
-                        .addPhase(new PlayerPlayPhase())
-                        .addPhase(new CalculateScorePhase());
-                        
-                    flow.executeFlow(game);
-                    logger.info("Score final: " + game.getTotalScore());
-                } else {
-                    logger.info("Mode " + strategyLabel + ": pas de generation automatique de formes");
-                }
+                configureGameAreaAndRunFlow(game, view, aiStrategy, strategyLabel, config);
             });
         });
+    }
+
+    private static void startTurnWaitThreadIfNeeded(GameModel game, String strategyLabel, TurnCoordinator turnCoordinator) {
+        if (!MainMenuView.STRATEGY_TWO_PLAYERS.equals(strategyLabel)) {
+            return;
+        }
+
+        Thread turnWaitThread = new Thread(() -> {
+            try {
+                while (!game.isGameFinished()) {
+                    turnCoordinator.awaitState(PlayerTurnState.HUMAN_GUI);
+                    turnCoordinator.awaitTurnCompletion();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }, "turn-wait-thread");
+        turnWaitThread.setDaemon(true);
+        turnWaitThread.start();
+    }
+
+    private static void configureGameAreaAndRunFlow(
+            GameModel game,
+            GameView view,
+            AIPlayerStrategy aiStrategy,
+            String strategyLabel,
+            LevelConfig config) {
+
+        int realGameAreaWidth = Math.max(1, view.getWidth() - INFO_PANEL_WIDTH);
+        int realGameAreaHeight = Math.max(1, view.getHeight());
+        game.setGameAreaSize(realGameAreaWidth, realGameAreaHeight);
+
+        switch (strategyLabel) {
+            case MainMenuView.STRATEGY_RANDOM -> runRandomFlow(game, config, realGameAreaWidth, realGameAreaHeight);
+            case MainMenuView.STRATEGY_TWO_PLAYERS -> runTwoPlayerFlow(game, config, realGameAreaWidth, realGameAreaHeight);
+            case MainMenuView.STRATEGY_AI -> runAIFlow(game, aiStrategy, config, realGameAreaWidth, realGameAreaHeight);
+            default -> logger.info("Mode " + strategyLabel + ": pas de generation automatique de formes");
+        }
+    }
+
+    private static void runRandomFlow(GameModel game, LevelConfig config, int realGameAreaWidth, int realGameAreaHeight) {
+        logger.info("Lancement variante simple (" + config.timeSeconds + " secondes visibles)");
+        game.generateRedShapes(config.redShapeCount, realGameAreaWidth, realGameAreaHeight);
+        GameFlowBuilder flow = GameFlowBuilder.createDefaultFlow();
+        flow.executeFlow(game);
+        logger.info("Score final: " + game.getTotalScore());
+    }
+
+    private static void runTwoPlayerFlow(GameModel game, LevelConfig config, int realGameAreaWidth, int realGameAreaHeight) {
+        logger.info("Lancement variante avec mémorisation (" + config.timeSeconds + " secondes)");
+        game.generateRedShapes(config.redShapeCount, realGameAreaWidth, realGameAreaHeight);
+        GameFlowBuilder flow = GameFlowBuilder.createVariantWithWait(config.timeSeconds * 1000L);
+        flow.executeFlow(game);
+        logger.info("Score final: " + game.getTotalScore());
+    }
+
+    private static void runAIFlow(GameModel game, AIPlayerStrategy aiStrategy, LevelConfig config, int realGameAreaWidth, int realGameAreaHeight) {
+        logger.info("Lancement variante IA (Intelligence Artificielle)");
+        game.generateRedShapes(config.redShapeCount, realGameAreaWidth, realGameAreaHeight);
+        if (aiStrategy != null) {
+            aiStrategy.setGameModel(game);
+            logger.info("AI: GameModel context provided to AI strategy");
+        }
+        GameFlowBuilder flow = new GameFlowBuilder()
+            .addPhase(new ShowObstaclesPhase())
+            .addPhase(new AIPlayPhase())
+            .addPhase(new PlayerPlayPhase())
+            .addPhase(new CalculateScorePhase());
+
+        flow.executeFlow(game);
+        logger.info("Score final: " + game.getTotalScore());
     }
 
     private static Command executeCommand(CommandType type, GameModel game, GameShape shape, double value1, double value2) {
